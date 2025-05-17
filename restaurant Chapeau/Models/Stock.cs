@@ -6,7 +6,7 @@
         public int MenuItemID { get; set; }
         public int QuantityAvailable { get; set; }
 
-        public string delete;
+        
 
     }
 }
