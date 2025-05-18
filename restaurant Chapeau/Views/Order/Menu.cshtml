@@ -1,0 +1,215 @@
+﻿     @model List<restaurant_Chapeau.Models.MenuItem>
+
+ @using restaurant_Chapeau.Models
+
+
+@{
+    ViewData["Title"] = "Menu";
+
+    var lunchStarters = Model.Where(m => m.MenuType == "Lunch" && m.Category == "Starter").ToList();
+    var lunchMains = Model.Where(m => m.MenuType == "Lunch" && m.Category == "Main").ToList();
+    var lunchDesserts = Model.Where(m => m.MenuType == "Lunch" && m.Category == "Dessert").ToList();
+
+    var dinnerStarters = Model.Where(m => m.MenuType == "Dinner" && m.Category == "Starter").ToList();
+    var dinnerEntremets = Model.Where(m => m.MenuType == "Dinner" && m.Category == "Entremet").ToList();
+    var dinnerMains = Model.Where(m => m.MenuType == "Dinner" && m.Category == "Main").ToList();
+    var dinnerDesserts = Model.Where(m => m.MenuType == "Dinner" && m.Category == "Dessert").ToList();
+
+    var softDrinks = Model.Where(m => m.MenuType == "Drink" && !m.IsAlcoholic).ToList();
+    var beers = Model.Where(m => m.Name.Contains("Duvel") || m.Name.Contains("Hertog Jan") || m.Name.Contains("Kriek") || m.Name.Contains("Leffe")).ToList();
+    var wines = Model.Where(m => m.Name.Contains("wine") || m.Name.Contains("Champagne")).ToList();
+    var spirits = Model.Where(m => m.Name.Contains("Whisky") || m.Name.Contains("Rum") || m.Name.Contains("Vieux") || m.Name.Contains("Jenever") || m.Name.Contains("Berenburg")).ToList();
+
+    // ✅ FIXED: Coffee/Tea includes only drinks, avoids overlap with desserts like "Café surprise"
+    var coffeeTea = Model.Where(m => m.MenuType == "Drink" &&
+        (m.Name.Contains("Coffee") || m.Name.Contains("Tea") || m.Name.Contains("Espresso") || m.Name.Contains("Cappuccino"))
+        && m.Category == "Drink" // Ensure only drinks (not miscategorized desserts)
+    ).ToList();
+}
+
+@section HeaderCart {
+    <div class="position-relative me-3">
+        <a href="/Order/Cart" class="btn btn-outline-secondary position-relative">
+            🛒 <span class="badge bg-danger position-absolute top-0 start-100 translate-middle" id="cartCount">0</span>
+        </a>
+    </div>
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Menu</h2>
+
+    <div id="toast" class="alert alert-success position-fixed top-0 end-0 m-4" style="display:none; z-index:1050;">
+        ✅ Order was added successfully!
+    </div>
+
+    <!-- LUNCH -->
+    <div class="p-3 mb-4 bg-light rounded shadow-sm">
+        <h3 class="text-primary">Lunch</h3>
+        <h5 class="text-secondary">Starters - Entrées</h5>
+        <div class="row">
+            @foreach (var item in lunchStarters)
+            {
+                @Html.Partial("_MenuItemCard", item)
+            }
+        </div>
+        <h5 class="text-secondary">Mains - Le plat principal</h5>
+        <div class="row">
+            @foreach (var item in lunchMains)
+            {
+                @Html.Partial("_MenuItemCard", item)
+            }
+        </div>
+        <h5 class="text-secondary">Desserts - Les Desserts</h5>
+        <div class="row">
+            @foreach (var item in lunchDesserts)
+            {
+                @Html.Partial("_MenuItemCard", item)
+            }
+        </div>
+    </div>
+
+    <!-- DINNER -->
+    <div class="p-3 mb-4 bg-warning-subtle rounded shadow-sm">
+        <h3 class="text-dark">Dinner</h3>
+        <h5 class="text-secondary">Starters - Entrées</h5>
+        <div class="row">
+            @foreach (var item in dinnerStarters)
+            {
+                @Html.Partial("_MenuItemCard", item)
+            }
+        </div>
+        <h5 class="text-secondary">Entremets</h5>
+        <div class="row">
+            @foreach (var item in dinnerEntremets)
+            {
+                @Html.Partial("_MenuItemCard", item)
+            }
+        </div>
+        <h5 class="text-secondary">Mains - Le plat principal</h5>
+        <div class="row">
+            @foreach (var item in dinnerMains)
+            {
+                @Html.Partial("_MenuItemCard", item)
+            }
+        </div>
+        <h5 class="text-secondary">Desserts - Les Desserts</h5>
+        <div class="row">
+            @foreach (var item in dinnerDesserts)
+            {
+                @Html.Partial("_MenuItemCard", item)
+            }
+        </div>
+    </div>
+
+    <!-- DRINKS -->
+    <div class="p-3 mb-4 bg-info-subtle rounded shadow-sm">
+        <h3 class="text-dark">Drinks - Les Boissons</h3>
+        <h5 class="text-secondary">Soft Drinks</h5>
+        <div class="row">
+            @foreach (var item in softDrinks)
+            {
+                @Html.Partial("_MenuItemCard", item)
+            }
+        </div>
+        <h5 class="text-secondary">Beers on Tap</h5>
+        <div class="row">
+            @foreach (var item in beers)
+            {
+                @Html.Partial("_MenuItemCard", item)
+            }
+        </div>
+        <h5 class="text-secondary">Wines</h5>
+        <div class="row">
+            @foreach (var item in wines)
+            {
+                @Html.Partial("_MenuItemCard", item)
+            }
+        </div>
+        <h5 class="text-secondary">Spirits</h5>
+        <div class="row">
+            @foreach (var item in spirits)
+            {
+                @Html.Partial("_MenuItemCard", item)
+            }
+        </div>
+        <h5 class="text-secondary">Coffee / Tea</h5>
+        <div class="row">
+            @foreach (var item in coffeeTea)
+            {
+                @Html.Partial("_MenuItemCard", item)
+            }
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        function getCart() {
+            return JSON.parse(localStorage.getItem("cart")) || [];
+        }
+
+        function saveCart(cart) {
+            localStorage.setItem("cart", JSON.stringify(cart));
+        }
+
+        function updateCartIcon() {
+            const cart = getCart();
+            const cartCount = document.getElementById("cartCount");
+            if (cartCount) cartCount.textContent = cart.length;
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.textContent = message;
+            toast.style.display = "block";
+            setTimeout(() => {
+                toast.style.display = "none";
+            }, 3000);
+        }
+
+        // ✅ Updated to accept unique element IDs
+        function addToCart(id, name, price, routing, maxQty, qtyInputId, noteInputId) {
+            const qtyInput = document.getElementById(qtyInputId);
+            const noteInput = document.getElementById(noteInputId);
+
+            if (!qtyInput) {
+                alert("Quantity input not found.");
+                return;
+            }
+
+            const qty = qtyInput.valueAsNumber;
+
+            if (!qty || isNaN(qty) || qty < 1) {
+                alert("Please enter a valid quantity.");
+                return;
+            }
+
+            if (qty > maxQty) {
+                alert("Requested quantity exceeds available stock.");
+                return;
+            }
+
+            const note = noteInput ? noteInput.value.trim() : "";
+            const cart = getCart();
+            const existing = cart.find(item => item.MenuItemID === id);
+
+            if (existing) {
+                if (existing.Quantity + qty > maxQty) {
+                    alert("Total quantity in cart exceeds available stock.");
+                    return;
+                }
+                existing.Quantity += qty;
+                if (note) existing.Note = note;
+            } else {
+                cart.push({ MenuItemID: id, Name: name, Price: price, Quantity: qty, Note: note, RoutingTarget: routing });
+            }
+
+            saveCart(cart);
+            updateCartIcon();
+            showToast("✅ Order was added successfully!");
+        }
+
+        document.addEventListener("DOMContentLoaded", updateCartIcon);
+    </script>
+}
+
+

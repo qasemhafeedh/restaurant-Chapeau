@@ -15,6 +15,9 @@ namespace restaurant_Chapeau.Controllers
 
         public IActionResult Index()
         {
+            if (HttpContext.Session.GetInt32("UserID") == null)
+                return RedirectToAction("Login", "Auth");
+
             return View();
         }
 
@@ -28,5 +31,7 @@ namespace restaurant_Chapeau.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+        
+
     }
 }

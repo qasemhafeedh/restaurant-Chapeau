@@ -1,8 +1,27 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
+    var backgroundImage = Url.Content("~/img/Picture1.png");
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<style>
+    .home-background {
+        background-image: url('@backgroundImage'); /* Razor resolves the correct path */
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        text-shadow: 1px 1px 4px rgba(0,0,0,0.7);
+    }
+</style>
+
+<div class="home-background text-center">
+    <div>
+        <h1 class="display-4">Welcome to Chapeau Restaurant</h1>
+    </div>
 </div>
+
+
