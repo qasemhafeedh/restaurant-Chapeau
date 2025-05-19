@@ -167,43 +167,68 @@
         }
 
         // ✅ Updated to accept unique element IDs
-        function addToCart(id, name, price, routing, maxQty, qtyInputId, noteInputId) {
+               function addToCart(id, name, price, routing, maxQty, qtyInputId, noteInputId) {
             const qtyInput = document.getElementById(qtyInputId);
             const noteInput = document.getElementById(noteInputId);
 
             if (!qtyInput) {
-                alert("Quantity input not found.");
+                alert("⚠️ Quantity input not found.");
                 return;
             }
 
-            const qty = qtyInput.valueAsNumber;
+            // Get and normalize the quantity value (handle commas)
+            let rawQty = qtyInput.value.trim().replace(',', '.');
+            let qty = parseFloat(rawQty);
 
-            if (!qty || isNaN(qty) || qty < 1) {
-                alert("Please enter a valid quantity.");
+            // Validate quantity
+            if (isNaN(qty) || qty < 1) {
+                alert("⚠️ Please enter a valid quantity (minimum 1).");
                 return;
             }
 
             if (qty > maxQty) {
-                alert("Requested quantity exceeds available stock.");
+                alert(`⚠️ Requested quantity (${qty}) exceeds available stock (${maxQty}).`);
                 return;
             }
 
+            // Prepare note
             const note = noteInput ? noteInput.value.trim() : "";
-            const cart = getCart();
-            const existing = cart.find(item => item.MenuItemID === id);
 
-            if (existing) {
-                if (existing.Quantity + qty > maxQty) {
-                    alert("Total quantity in cart exceeds available stock.");
+            // Load existing cart or start new
+            const cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+            // Try to find existing item
+            const existingItem = cart.find(item => item.MenuItemID === id);
+
+            if (existingItem) {
+                // Update quantity (check stock limit)
+                const newTotalQty = existingItem.Quantity + qty;
+
+                if (newTotalQty > maxQty) {
+                    alert(`⚠️ Total quantity in cart (${newTotalQty}) exceeds available stock (${maxQty}).`);
                     return;
                 }
-                existing.Quantity += qty;
-                if (note) existing.Note = note;
+
+                existingItem.Quantity = newTotalQty;
+
+                // Update note only if provided
+                if (note) {
+                    existingItem.Note = note;
+                }
             } else {
-                cart.push({ MenuItemID: id, Name: name, Price: price, Quantity: qty, Note: note, RoutingTarget: routing });
+                // Add new item to cart
+                cart.push({
+                    MenuItemID: id,
+                    Name: name,
+                    Price: price,
+                    Quantity: qty,
+                    Note: note,
+                    RoutingTarget: routing
+                });
             }
 
-            saveCart(cart);
+            // Save and update
+            localStorage.setItem("cart", JSON.stringify(cart));
             updateCartIcon();
             showToast("✅ Order was added successfully!");
         }
