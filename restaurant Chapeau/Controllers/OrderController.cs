@@ -58,6 +58,12 @@ namespace restaurant_Chapeau.Controllers
                 TempData["OrderStatus"] = "Cart is empty.";
                 return RedirectToAction("Cart");
             }
+            if (model.TableID == 0)
+            {
+                TempData["OrderStatus"] = "❌ You must select a table before submitting the order.";
+                return RedirectToAction("Cart");
+            }
+
 
             try
             {

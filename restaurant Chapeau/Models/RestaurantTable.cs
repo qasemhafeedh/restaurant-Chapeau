@@ -5,8 +5,8 @@
         public int TableID { get; set; }
         public int TableNumber { get; set; }
         public bool IsReserved { get; set; }
-        public DateTime? ReservationStart { get; set; }  // ✅ NEW
-        public DateTime? ReservationEnd { get; set; }    // ✅ NEW
+        public DateTime? ReservationStart { get; set; }  //  NEW
+        public DateTime? ReservationEnd { get; set; }    //  NEW
     }
 
 

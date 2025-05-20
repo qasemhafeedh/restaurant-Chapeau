@@ -115,17 +115,8 @@ namespace restaurant_Chapeau.Repositories
 
         public async Task<int> CreateOrderAsync(int tableId, string comment)
         {
-            using SqlConnection conn = new(_connectionString);
-            await conn.OpenAsync();
-
-            var cmd = new SqlCommand(@"
-                INSERT INTO Orders (TableID, Comment, CreatedAt) 
-                OUTPUT INSERTED.OrderID 
-                VALUES (@table, @comment, GETDATE())", conn);
-            cmd.Parameters.AddWithValue("@table", tableId);
-            cmd.Parameters.AddWithValue("@comment", comment ?? "");
-
-            return (int)await cmd.ExecuteScalarAsync();
+            // Only used if needed elsewhere
+            throw new NotImplementedException();
         }
 
         public async Task AddOrderItemsAsync(int orderId, List<CartItem> items)
@@ -136,36 +127,16 @@ namespace restaurant_Chapeau.Repositories
             foreach (var item in items)
             {
                 var cmd = new SqlCommand(@"
-                    INSERT INTO OrderItems (OrderID, MenuItemID, Quantity, Note, RoutingTarget) 
-                    VALUES (@order, @item, @qty, @note, @route)", conn);
+                    INSERT INTO OrderItems (OrderID, MenuItemID, Quantity, Status, Timestamp) 
+                    VALUES (@order, @item, @qty, @status, GETDATE())", conn);
 
                 cmd.Parameters.AddWithValue("@order", orderId);
                 cmd.Parameters.AddWithValue("@item", item.MenuItemID);
                 cmd.Parameters.AddWithValue("@qty", item.Quantity);
-                cmd.Parameters.AddWithValue("@note", item.Note ?? "");
-                cmd.Parameters.AddWithValue("@route", item.RoutingTarget ?? "");
+                cmd.Parameters.AddWithValue("@status", "Pending");
 
                 await cmd.ExecuteNonQueryAsync();
             }
-        }
-
-        public async Task CreateInvoiceAsync(int orderId, int userId, decimal total, decimal tip, decimal vat)
-        {
-            using SqlConnection conn = new(_connectionString);
-            await conn.OpenAsync();
-
-            var cmd = new SqlCommand(@"
-                INSERT INTO Invoices (InvoiceNumber, OrderID, UserID, TotalAmount, TipAmount, VATAmount) 
-                VALUES (@num, @order, @user, @total, @tip, @vat)", conn);
-
-            cmd.Parameters.AddWithValue("@num", $"INV-{Guid.NewGuid().ToString().Substring(0, 8)}");
-            cmd.Parameters.AddWithValue("@order", orderId);
-            cmd.Parameters.AddWithValue("@user", userId);
-            cmd.Parameters.AddWithValue("@total", total);
-            cmd.Parameters.AddWithValue("@tip", tip);
-            cmd.Parameters.AddWithValue("@vat", vat);
-
-            await cmd.ExecuteNonQueryAsync();
         }
 
         public async Task ReserveTableAsync(int tableId)
@@ -196,15 +167,26 @@ namespace restaurant_Chapeau.Repositories
             }
 
             await ReserveTableAsync(model.TableID);
-            int orderId = await CreateOrderAsync(model.TableID, model.Comment);
+
+            int orderId = await CreateOrderRecordAsync(conn, model, userId);
             await AddOrderItemsAsync(orderId, model.CartItems);
 
-            decimal total = model.CartItems.Sum(i => i.Price * i.Quantity);
-            decimal vat = model.CartItems.Sum(i => i.Price * i.Quantity * i.VATRate);
-
-            await CreateInvoiceAsync(orderId, userId, total, model.TipAmount, vat);
-
             return true;
+        }
+
+        private async Task<int> CreateOrderRecordAsync(SqlConnection conn, OrderSubmission model, int userId)
+        {
+            var cmd = new SqlCommand(@"
+                INSERT INTO Orders (TableID, UserID, OrderTime, TipAmount, Comment)
+                OUTPUT INSERTED.OrderID
+                VALUES (@table, @user, GETDATE(), @tip, @comment)", conn);
+
+            cmd.Parameters.AddWithValue("@table", model.TableID);
+            cmd.Parameters.AddWithValue("@user", userId);
+            cmd.Parameters.AddWithValue("@tip", model.TipAmount);
+            cmd.Parameters.AddWithValue("@comment", model.Comment ?? "");
+
+            return (int)await cmd.ExecuteScalarAsync();
         }
     }
 }
