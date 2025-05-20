@@ -14,6 +14,8 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/restaurant_Chapeau.styles.css" asp-append-version="true" />
     <link rel="icon" type="image/png" href="~/img/Picture1.png" />
+    
+    
 </head>
 <body>
     <header>
@@ -24,7 +26,7 @@
                     <!-- Logo -->
                     <a class="navbar-brand d-flex align-items-center" asp-controller="Home" asp-action="Index">
                         <img src="~/img/Picture1.png" alt="Logo" style="height: 40px; width: auto; margin-right: 10px;" />
-                        <strong class="fs-5" style="color: black;">restaurant_Chapeau</strong>
+                        <strong class="fs-5" style="color: black;">Chapeau Restaurant</strong>
 
                     </a>
 
@@ -51,10 +53,13 @@
                             @if (role == "Manager")
                             {
                                 <li class="nav-item me-3">
+                                    <a class="nav-link fw-semibold" asp-controller="Menu" asp-action="ManageMenu">Manage Menu</a>
+                                </li>
+                                <li class="nav-item me-3">
                                     <a class="nav-link fw-semibold" asp-controller="User" asp-action="Index">Manage Users</a>
                                 </li>
                                 <li class="nav-item me-3">
-                                    <a class="nav-link fw-semibold" asp-controller="Stock" asp-action="Edit">Modify Stock</a>
+                                    <a class="nav-link fw-semibold" asp-controller="Stock" asp-action="Edit">Adjust Stock</a>
                                 </li>
                             }
                         </ul>
