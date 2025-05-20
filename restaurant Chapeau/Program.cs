@@ -3,6 +3,7 @@ using restaurant_Chapeau.Repositaries;
 using restaurant_Chapeau.Services;
 using restaurant_Chapeau.Services.Interfaces;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // ✅ Add MVC support
@@ -21,6 +22,12 @@ builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 
 builder.Services.AddScoped<IAuthService, AuthService>(); // ✅ Required for AuthController
+
+builder.Services.AddScoped<IStockRepository, StockRepository>(); // ✅  stock repository.  this connects the interface to the DB logic
+builder.Services.AddScoped<IStockService, StockService>(); // ✅  stock service.  t
+
+builder.Services.AddScoped<IMenuRepository, MenuRepository>();
+builder.Services.AddScoped<IMenuService, MenuService>();
 
 var app = builder.Build();
 

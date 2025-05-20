@@ -11,5 +11,7 @@
         public int QuantityAvailable { get; set; }
         public string MenuType { get; set; }
         public string RoutingTarget { get; set; }
+
+        public bool IsActive { get; set; }
     }
 }
