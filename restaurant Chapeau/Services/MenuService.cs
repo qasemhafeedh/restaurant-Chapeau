@@ -24,5 +24,20 @@ namespace restaurant_Chapeau.Services
         {
             _repo.AddItem(item);
         }
+        //EDIT
+        public MenuItem GetItemById(int id)
+        {
+            return _repo.GetItemById(id);
+        }
+
+        public void UpdateItem(MenuItem item)
+        {
+            _repo.UpdateItem(item);
+        }
+        //Activate button
+        public void ToggleActive(int id)
+        {
+            _repo.ToggleActive(id);
+        }
     }
 }

@@ -8,24 +8,24 @@
     <thead>
         <!-- Table header (column titles) -->
         <tr>
-            <th>Name</th> <!-- Item name -->
-            <th>Category</th> <!-- Food, Drink, etc. -->
-            <th>Quantity Available</th> <!-- Current stock quantity -->
-            <th>Action</th> <!-- Button to go to edit page -->
+            <th>Name</th>
+            <th>Category</th> 
+            <th>Quantity Available</th> 
+            <th>Action</th> 
         </tr>
     </thead>
     <tbody>
         @foreach (var item in Model) // Loop through each item in the stock list
         {
-            // If the item's quantity is less than 5, highlight the row with a red background
-            var rowColor = item.QuantityAvailable < 5 ? "style='background-color: #f8d7da'" : "";
+            // If the item's quantity is less than 10 then highlight the row with a red background
+            var rowColor = item.QuantityAvailable <= 10 ? "style='background-color: #f8d7da'" : "";
 
             // Display one table row for this item
             <tr @Html.Raw(rowColor)>
                 <!-- Apply red background if stock is low -->
-                <td>@item.Name</td> <!-- Show the item name -->
-                <td>@item.Category</td> <!-- Show the item category -->
-                <td>@item.QuantityAvailable</td> <!-- Show how much stock is available -->
+                <td>@item.Name</td> 
+                <td>@item.Category</td> 
+                <td>@item.QuantityAvailable</td> 
                 <td>
                     <!-- Edit button: sends user to the Edit page with the item ID -->
                     <a class="btn btn-primary btn-sm" href="/Stock/Edit/@item.MenuItemID">Edit</a>

@@ -6,6 +6,10 @@ namespace restaurant_Chapeau.Repositaries
     {
         List<MenuItem> GetAllItems();
         void AddItem(MenuItem item);
-        
+        //EDIT
+        MenuItem GetItemById(int id);
+        void UpdateItem(MenuItem item);
+        //Activate mennu item
+        void ToggleActive(int id);
     }
 }
