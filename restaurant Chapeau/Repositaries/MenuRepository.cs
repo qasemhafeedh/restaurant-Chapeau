@@ -36,7 +36,8 @@ namespace restaurant_Chapeau.Repositories
                     VATRate = (decimal)reader["VATRate"],
                     QuantityAvailable = (int)reader["QuantityAvailable"],
                     MenuType = reader["MenuType"].ToString(),
-                    RoutingTarget = reader["RoutingTarget"].ToString()
+                    RoutingTarget = reader["RoutingTarget"].ToString(),
+                     IsActive = (bool)reader["IsActive"] //for the activeate button
                 });
             }
 
@@ -59,6 +60,85 @@ namespace restaurant_Chapeau.Repositories
             cmd.Parameters.AddWithValue("@routing", item.RoutingTarget);
 
             cmd.ExecuteNonQuery();
+
+
+        }
+        //EDIT Meny Item
+        public MenuItem GetItemById(int id)
+        {
+            SqlConnection conn = new SqlConnection(_connectionString);
+            conn.Open();
+
+            SqlCommand cmd = new SqlCommand("SELECT * FROM MenuItems WHERE MenuItemID = @id", conn);
+            cmd.Parameters.AddWithValue("@id", id);
+
+            SqlDataReader reader = cmd.ExecuteReader();
+
+            MenuItem item = null;
+
+            if (reader.Read())
+            {
+                item = new MenuItem
+                {
+                    MenuItemID = (int)reader["MenuItemID"],
+                    Name = reader["Name"].ToString(),
+                    Category = reader["Category"].ToString(),
+                    Price = (decimal)reader["Price"],
+                    QuantityAvailable = (int)reader["QuantityAvailable"],
+                    MenuType = reader["MenuType"].ToString(),
+                    RoutingTarget = reader["RoutingTarget"].ToString(),
+                    IsActive = (bool)reader["IsActive"],
+                    IsAlcoholic = (bool)reader["IsAlcoholic"],
+                    VATRate = (decimal)reader["VATRate"]
+                };
+            }
+
+            reader.Close();
+            conn.Close();
+
+            return item;
+        }
+        
+        public void UpdateItem(MenuItem item)
+        {
+            SqlConnection conn = new SqlConnection(_connectionString);
+            conn.Open();
+
+            SqlCommand cmd = new SqlCommand(@"
+            UPDATE MenuItems SET
+            Name = @name,
+            Price = @price,
+            Category = @category,
+            QuantityAvailable = @qty,
+            MenuType = @menuType,
+            RoutingTarget = @routing
+            WHERE MenuItemID = @id", conn);
+
+            cmd.Parameters.AddWithValue("@name", item.Name);
+            cmd.Parameters.AddWithValue("@price", item.Price);
+            cmd.Parameters.AddWithValue("@category", item.Category);
+            cmd.Parameters.AddWithValue("@qty", item.QuantityAvailable);
+            cmd.Parameters.AddWithValue("@menuType", item.MenuType);
+            cmd.Parameters.AddWithValue("@routing", item.RoutingTarget);
+            cmd.Parameters.AddWithValue("@id", item.MenuItemID);
+
+            cmd.ExecuteNonQuery();
+            conn.Close();
+        }
+        //Activate menu item button
+        public void ToggleActive(int id)
+        {
+            SqlConnection conn = new SqlConnection(_connectionString);
+            conn.Open();
+
+            SqlCommand cmd = new SqlCommand(@"
+        UPDATE MenuItems
+        SET IsActive = CASE WHEN IsActive = 1 THEN 0 ELSE 1 END
+        WHERE MenuItemID = @id", conn);
+
+            cmd.Parameters.AddWithValue("@id", id);
+            cmd.ExecuteNonQuery();
+            conn.Close();
         }
     }
 }

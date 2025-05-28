@@ -1,37 +1,67 @@
 ﻿@model List<restaurant_Chapeau.Models.MenuItem>
+
 <div class="container mt-5 pt-5">
-<h2>Manage Menu</h2>
+	<h2>Manage Menu</h2>
 
-<!-- Add New Item Button -->
-<a href="/Menu/Add" class="btn btn-success mb-3">Add New Menu Item</a>
+	<!-- Add New Item Button -->
+	<a href="/Menu/Add" class="btn btn-success mb-3">Add New Menu Item</a>
+	<!-- Filtering items -->
+	<form method="get" class="row g-3 mb-3">
+		<div class="col-md-3">
+			<label>Filter by Menu Type</label>
+			<select name="menuType" class="form-select">
+				<option>All</option>
+				<option>Lunch</option>
+				<option>Dinner</option>
+				<option>Drink</option>
+			</select>
+		</div>
 
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Price (€)</th>
-            <th>Category</th>
-            <th>Menu Type</th>
-            <th>Status</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.Name</td>
-                <td>@item.Price</td>
-                <td>@item.Category</td>
-                <td>@item.MenuType</td>
-                <td>@(item.IsActive ? "Active" : "Inactive")</td>
-                <td>
-                    <a href="/Menu/Edit/@item.MenuItemID" class="btn btn-primary btn-sm">Edit</a>
-                    <a href="/Menu/ToggleActive/@item.MenuItemID" class="btn btn-warning btn-sm">
-                        @(item.IsActive ? "Deactivate" : "Activate")
-                    </a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table> </div>
+		<div class="col-md-3">
+			<label>Filter by Category</label>
+			<select name="category" class="form-select">
+				<option>All</option>
+				<option>Starter</option>
+				<option>Main</option>
+				<option>Dessert</option>
+				<option>Drink</option>
+			</select>
+		</div>
+
+		<div class="col-md-2 d-flex align-items-end">
+			<button type="submit" class="btn btn-outline-primary w-100">Apply</button>
+			</div>
+	</form>
+	<table class="table table-bordered">
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>Price (€)</th>
+				<th>Category</th>
+				<th>Menu Type</th>
+				<th>Status</th>
+				<th>Action</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (MenuItem item in Model)
+			{
+				<!-- tr: boostrap layout for activate button -->
+				<tr class="@(item.IsActive ? "" : "table-danger")">
+					<td>@item.Name</td>
+					<td>@item.Price</td>
+					<td>@item.Category</td>
+					<td>@item.MenuType</td>
+					<td>@(item.IsActive ? "Active" : "Inactive")</td>
+					<td>
+						<a href="/Menu/Edit/@item.MenuItemID" class="btn btn-primary btn-sm">Edit</a>
+						<a href="/Menu/ToggleActive/@item.MenuItemID"
+						   class="btn @(item.IsActive ? "btn-warning" : "btn-success") btn-sm">
+							@(item.IsActive ? "Deactivate" : "Activate")
+						</a>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+</div>
