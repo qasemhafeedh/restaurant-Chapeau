@@ -1,6 +1,7 @@
 ﻿using System.Data.SqlClient;
 using restaurant_Chapeau.Models;
 using restaurant_Chapeau.Repositaries;
+using static restaurant_Chapeau.Models.OrderManagement;
 
 namespace restaurant_Chapeau.Repositories
 {
@@ -188,5 +189,8 @@ namespace restaurant_Chapeau.Repositories
 
             return (int)await cmd.ExecuteScalarAsync();
         }
+    
+
+
     }
 }

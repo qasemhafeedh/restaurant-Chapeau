@@ -18,6 +18,8 @@
                 <select asp-for="Role" class="form-select" id="roleSelect" onchange="enableLoginFields()">
                     <option value="">-- Select Role --</option>
                     <option value="Manager">Manager</option>
+                    <option value="Kitchen">Kitchen</option>
+
                     <option value="Waiter">Waiter</option>
                 </select>
                 <span asp-validation-for="Role" class="text-danger small"></span>

@@ -20,6 +20,10 @@ builder.Services.AddSession(options =>
 // ✅ Register Repositories and Services
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IOrderManagementService, OrderManagementService>();
+builder.Services.AddScoped<IOrderManagement, OrderManagementRepository>();
+// ✅  order management repository.  this connects the interface to the DB logic
+
 
 builder.Services.AddScoped<IAuthService, AuthService>(); // ✅ Required for AuthController
 

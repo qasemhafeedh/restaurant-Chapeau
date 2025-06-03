@@ -1,0 +1,46 @@
+﻿@model restaurant_Chapeau.Models.Orders
+@using restaurant_Chapeau.Models
+
+@{
+    ViewData["Title"] = "Order Details";
+}
+
+<h1>Order Details</h1>
+<div class="order-card">
+    <h3>Order ID: @Model.Id</h3>
+    <p><strong>Table:</strong> @Model.TableNumber</p>
+    <p><strong>Order Time:</strong> @Model.OrderTime.ToString("g")</p>
+    <p><strong>Status:</strong> @Model.Status</p>
+    @if (!string.IsNullOrEmpty(Model.comment))
+        {
+        <p><strong>Comment:</strong> @Model.comment</p>
+    }
+    <a asp-action="Orders" class="btn btn-secondary">Back to Orders List</a>
+
+    <h4>Items:</h4>
+    @foreach (var group in Model.Items.GroupBy(i => i.courseType))
+    {
+        <div>
+            <strong>@group.Key</strong>
+            <ul>
+                @foreach (var item in group)
+                {
+                    <li>
+                        <span>@item.Name (@item.itemStatus)</span>
+                        <form asp-action="UpdateOrderItemStatus" asp-controller="OrderManagement" method="post" style="display:inline;">
+                            <input type="hidden" name="itemId" value="@item.Id" />
+                            <input type="hidden" name="orderId" value="@Model.Id" />
+                            <select name="newStatus">
+                                @foreach (var status in Enum.GetValues(typeof(ItemStatus)))
+                                {
+                                    var isSelected = item.itemStatus == (ItemStatus)status ? "selected" : "";
+                                }
+                            </select>
+                            <button type="submit">Update</button>
+                        </form>
+                    </li>
+                }
+            </ul>
+        </div>
+    }
+</div>

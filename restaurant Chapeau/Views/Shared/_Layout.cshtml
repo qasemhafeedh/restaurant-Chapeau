@@ -44,7 +44,7 @@
                     <!-- Navigation links -->
                     <div class="collapse navbar-collapse justify-content-between" id="navbarSupportedContent">
                         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                            @if (role == "Waiter" || role == "Manager")
+                            @if (role == "Waiter" || role == "Manager" || role == "Kitchen" || role == "Bar")
                             {
                                 <li class="nav-item me-3">
                                     <a class="nav-link fw-semibold" asp-controller="Order" asp-action="Menu">Menu</a>
@@ -61,6 +61,13 @@
                                 <li class="nav-item me-3">
                                     <a class="nav-link fw-semibold" asp-controller="Stock" asp-action="Edit">Adjust Stock</a>
                                 </li>
+                            }
+                            @if (role == "Kitchen")
+                            {
+                                <li class="nav-item me-3">
+                                    <a class="nav-link fw-semibold" asp-controller="OrderManagement" asp-action="Orders">All Orders </a>
+                                </li>
+                                
                             }
                         </ul>
 
@@ -97,3 +104,51 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+<style>
+    .orders-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 24px;
+        justify-content: flex-start;
+        margin-top: 20px;
+    }
+
+    .order-card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        padding: 20px 28px;
+        width: 320px;
+        margin-bottom: 12px;
+        transition: box-shadow 0.2s;
+        border: 1px solid #f0f0f0;
+    }
+
+        .order-card:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.14);
+        }
+
+        .order-card h3 {
+            margin-top: 0;
+            font-size: 1.3rem;
+            color: #2c3e50;
+        }
+
+        .order-card p, .order-card li {
+            margin: 6px 0;
+            font-size: 1rem;
+        }
+
+        .order-card ul {
+            padding-left: 20px;
+            margin: 0;
+        }
+
+    hr {
+        margin-top: 18px;
+        margin-bottom: 0;
+        border: 0;
+        border-top: 1px solid #eee;
+    }
+</style>
+

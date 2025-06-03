@@ -1,0 +1,54 @@
+﻿@model List<restaurant_Chapeau.Models.Orders>
+@using restaurant_Chapeau.Models
+
+@{
+    ViewData["Title"] = "All Orders";
+}
+
+<h1>All Orders</h1>
+
+<div class="orders-container">
+    @foreach (var order in Model)
+    {
+        <div class="order-card">
+            <h3>Order ID: @order.Id</h3>
+            <p><strong>Table:</strong> @order.TableNumber</p>
+            <p><strong>Order Time:</strong> @order.OrderTime.ToString("g")</p>
+            <p><strong>Status:</strong> @order.Status</p>
+            @if (!string.IsNullOrEmpty(order.comment))
+            {
+                <p><strong>Comment:</strong> @order.comment</p>
+            }
+
+            <a asp-action="OrderDetails" asp-route-id="@order.Id" class="btn btn-primary">View Details</a>
+
+            <h4>Items:</h4>
+            @foreach (var group in order.Items.GroupBy(i => i.courseType))
+            {
+                <div>
+                    <strong>@group.Key</strong>
+                    <ul>
+                        @foreach (var item in group)
+                        {
+                            <li>
+                                <span>@item.Name (@item.itemStatus)</span>
+                                <form asp-action="UpdateOrderItemStatus" asp-controller="OrderManagement" method="post" style="display:inline;">
+                                    <input type="hidden" name="itemId" value="@item.Id" />
+                                    <input type="hidden" name="orderId" value="@order.Id" />
+                                    <select name="newStatus">
+                                        @foreach (var status in Enum.GetValues(typeof(ItemStatus)))
+                                        {
+                                            var isSelected = item.itemStatus == (ItemStatus)status ? "selected" : "";
+                                        }
+                                    </select>
+                                    <button type="submit">Update</button>
+                                </form>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+            <hr />
+        </div>
+    }
+</div>
