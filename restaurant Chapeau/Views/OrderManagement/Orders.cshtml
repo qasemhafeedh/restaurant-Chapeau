@@ -2,53 +2,122 @@
 @using restaurant_Chapeau.Models
 
 @{
-    ViewData["Title"] = "All Orders";
+    ViewData["Title"] = ViewBag.OrderType == "finished" ? "Finished Orders" : "Running Orders";
 }
 
-<h1>All Orders</h1>
+<h1>@(ViewBag.OrderType == "finished" ? "Finished Orders" : "Running Orders")</h1>
+
+<div class="view-controls">
+    <div class="navigation-buttons">
+        <a asp-action="Orders" asp-route-orderType="running" class="btn @(ViewBag.OrderType != "finished" ? "btn-primary" : "btn-secondary")">Running Orders</a>
+        <a asp-action="Orders" asp-route-orderType="finished" class="btn @(ViewBag.OrderType == "finished" ? "btn-primary" : "btn-secondary")">Finished Orders</a>
+    </div>
+    
+    <div class="department-buttons">
+        <a asp-action="KitchenOrders" class="btn btn-success">Kitchen View</a>
+        <a asp-action="BarOrders" class="btn btn-info">Bar View</a>
+    </div>
+</div>
 
 <div class="orders-container">
-    @foreach (var order in Model)
+    @if (Model.Any())
     {
-        <div class="order-card">
-            <h3>Order ID: @order.Id</h3>
-            <p><strong>Table:</strong> @order.TableNumber</p>
-            <p><strong>Order Time:</strong> @order.OrderTime.ToString("g")</p>
-            <p><strong>Status:</strong> @order.Status</p>
-            @if (!string.IsNullOrEmpty(order.comment))
-            {
-                <p><strong>Comment:</strong> @order.comment</p>
-            }
+        @foreach (var order in Model)
+        {
+            <div class="order-card">
+                <div class="order-header">
+                    <h3>Order #@order.Id - Table @order.TableNumber</h3>
+                    <div class="order-meta">
+                        <span class="order-time">@order.OrderTime.ToString("g")</span>
+                        <span class="order-status status-@order.Status.ToString().ToLower()">@order.Status</span>
+                    </div>
+                </div>
+                
+                @if (!string.IsNullOrEmpty(order.comment))
+                {
+                    <div class="order-comment">
+                        <strong>Comment:</strong> @order.comment
+                    </div>
+                }
 
-            <a asp-action="OrderDetails" asp-route-id="@order.Id" class="btn btn-primary">View Details</a>
+                <!-- Order-level controls -->
+                <div class="order-controls">
+                    <a asp-action="OrderDetails" asp-route-id="@order.Id" class="btn btn-sm btn-outline-primary">View Details</a>
+                    
+                    @if (ViewBag.OrderType != "finished")
+                    {
+                        <form asp-action="UpdateOrderStatus" method="post" style="display:inline;">
+                            <input type="hidden" name="orderId" value="@order.Id" />
+                            <input type="hidden" name="returnAction" value="Orders" />
+                            <select name="newStatus" onchange="this.form.submit()" class="form-select form-select-sm" style="width: auto; display: inline;">
+                                <option value="">Change Order Status</option>
+                                Running
+                                Finished
+                            </select>
+                        </form>
+                    }
+                </div>
 
-            <h4>Items:</h4>
-            @foreach (var group in order.Items.GroupBy(i => i.courseType))
-            {
-                <div>
-                    <strong>@group.Key</strong>
-                    <ul>
-                        @foreach (var item in group)
-                        {
-                            <li>
-                                <span>@item.Name (@item.itemStatus)</span>
-                                <form asp-action="UpdateOrderItemStatus" asp-controller="OrderManagement" method="post" style="display:inline;">
-                                    <input type="hidden" name="itemId" value="@item.Id" />
+                <!-- Items grouped by course -->
+                @foreach (var courseGroup in order.Items.GroupBy(i => i.courseType).OrderBy(g => g.Key))
+                {
+                    <div class="course-section">
+                        <div class="course-header">
+                            <h5 class="course-title">@courseGroup.Key</h5>
+                            
+                            @if (ViewBag.OrderType != "finished")
+                            {
+                                <form asp-action="UpdateCourseStatus" method="post" class="course-status-form">
                                     <input type="hidden" name="orderId" value="@order.Id" />
-                                    <select name="newStatus">
+                                    <input type="hidden" name="courseType" value="@courseGroup.Key" />
+                                    <input type="hidden" name="returnAction" value="Orders" />
+                                    <select name="newStatus" onchange="this.form.submit()" class="form-select form-select-sm course-select">
+                                        <option value="">Update All @courseGroup.Key</option>
                                         @foreach (var status in Enum.GetValues(typeof(ItemStatus)))
                                         {
-                                            var isSelected = item.itemStatus == (ItemStatus)status ? "selected" : "";
+                                            <option value="@status">@status</option>
                                         }
                                     </select>
-                                    <button type="submit">Update</button>
                                 </form>
-                            </li>
-                        }
-                    </ul>
-                </div>
-            }
-            <hr />
+                            }
+                        </div>
+                        
+                        <div class="items-grid">
+                            @foreach (var item in courseGroup)
+                            {
+                                <div class="item-card @item.itemStatus.ToString().ToLower()">
+                                    <div class="item-info">
+                                        <span class="item-name">@item.Name</span>
+                                        <span class="item-status-badge">@item.itemStatus</span>
+                                    </div>
+                                    
+                                    @if (ViewBag.OrderType != "finished")
+                                    {
+                                        <form asp-action="UpdateOrderItemStatus" method="post" class="item-status-form">
+                                            <input type="hidden" name="itemId" value="@item.Id" />
+                                            <input type="hidden" name="orderId" value="@order.Id" />
+                                            <input type="hidden" name="returnAction" value="Orders" />
+                                            <select name="newStatus" onchange="this.form.submit()" class="form-select form-select-sm">
+                                                @foreach (var status in Enum.GetValues(typeof(ItemStatus)))
+                                                {
+                                                    @status
+                                                }
+                                            </select>
+                                        </form>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+                <hr />
+            </div>
+        }
+    }
+    else
+    {
+        <div class="no-orders">
+            <p>No @(ViewBag.OrderType == "finished" ? "finished" : "running") orders found.</p>
         </div>
     }
 </div>

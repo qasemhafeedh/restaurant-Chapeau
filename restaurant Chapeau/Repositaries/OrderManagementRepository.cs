@@ -39,7 +39,6 @@ namespace restaurant_Chapeau.Repositaries
 
                 string query = @"
                 SELECT o.OrderId, o.TableID, o.Comment, o.OrderTime, mi.Name AS MenuItemName, mi.Category, oi.Status, oi.OrderItemID
-
                 FROM Orders o
                 JOIN OrderItems oi ON o.OrderId = oi.OrderId
                 JOIN MenuItems mi ON oi.MenuItemId = mi.MenuItemId
@@ -73,16 +72,14 @@ namespace restaurant_Chapeau.Repositaries
                     {
                         Name = reader["MenuItemName"].ToString(),
                         Id = (int)reader["OrderItemID"],
-                        courseType = Enum.TryParse<CourseType>(reader["Category"].ToString(), out var ct) ? ct : default,
-                        itemStatus = Enum.TryParse<ItemStatus>(reader["Status"].ToString(), out var status) ? status : ItemStatus.Pending // or your default
+                        courseType = Enum.TryParse<CourseType>(reader["Category"].ToString(), out var ct) ? ct : CourseType.Main,
+                        itemStatus = Enum.TryParse<ItemStatus>(reader["Status"].ToString(), out var status) ? status : ItemStatus.Pending
                     });
                 }
-
             }
-                return orders;
+            return orders;
         }
 
-        // Now you don't need to filter by status later, but you can still use these if you want
         public List<Orders> GetRunningOrders(List<Orders> orders)
         {
             return orders.Where(order => order.Status == OrderStatus.Running).ToList();
@@ -93,34 +90,17 @@ namespace restaurant_Chapeau.Repositaries
             return orders.Where(order => order.Status == OrderStatus.Finished).ToList();
         }
 
-
         public Orders GetOrderById(int orderId)
-
         {
-            using SqlConnection conn = new(_connectionString);
-            conn.Open();
-
-            var cmd = new SqlCommand("SELECT * FROM Orders WHERE OrderId = @id", conn);
-            cmd.Parameters.AddWithValue("@id", orderId);
-
-            using var reader = cmd.ExecuteReader();
-            if (reader.Read())
-            {
-                return new Orders
-                {
-                   
-                };
-            }
-
-            return null;
+            var orders = GetAllOrders();
+            return orders.FirstOrDefault(o => o.Id == orderId);
         }
 
-        public void UpdateOrderItemStatus(int orderItemId, OrderStatus newStatus)
+        public void UpdateOrderItemStatus(int orderItemId, ItemStatus newStatus)
         {
             using var conn = new SqlConnection(_connectionString);
             conn.Open();
 
-            // Save status as a string: "Pending", "Preparing", "Ready", "Served"
             var cmd = new SqlCommand("UPDATE OrderItems SET Status = @status WHERE OrderItemId = @itemId", conn);
             cmd.Parameters.AddWithValue("@status", newStatus.ToString());
             cmd.Parameters.AddWithValue("@itemId", orderItemId);
@@ -128,6 +108,56 @@ namespace restaurant_Chapeau.Repositaries
             cmd.ExecuteNonQuery();
         }
 
-        
+        public void UpdateCourseStatus(int orderId, CourseType courseType, ItemStatus newStatus)
+        {
+            using var conn = new SqlConnection(_connectionString);
+            conn.Open();
+
+            // Update all items of a specific course type within an order
+            string query = @"
+                UPDATE oi 
+                SET Status = @status 
+                FROM OrderItems oi
+                JOIN MenuItems mi ON oi.MenuItemId = mi.MenuItemId
+                WHERE oi.OrderId = @orderId AND mi.Category = @courseType";
+
+            var cmd = new SqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("@status", newStatus.ToString());
+            cmd.Parameters.AddWithValue("@orderId", orderId);
+            cmd.Parameters.AddWithValue("@courseType", courseType.ToString());
+
+            cmd.ExecuteNonQuery();
+        }
+
+        public void UpdateOrderStatus(int orderId, OrderStatus newStatus)
+        {
+            using var conn = new SqlConnection(_connectionString);
+            conn.Open();
+
+            // If setting to finished, create an invoice record
+            if (newStatus == OrderStatus.Finished)
+            {
+                // Check if invoice already exists
+                var checkCmd = new SqlCommand("SELECT COUNT(*) FROM Invoices WHERE OrderId = @orderId", conn);
+                checkCmd.Parameters.AddWithValue("@orderId", orderId);
+                int count = (int)checkCmd.ExecuteScalar();
+
+                if (count == 0)
+                {
+                    // Create invoice record
+                    var invoiceCmd = new SqlCommand("INSERT INTO Invoices (OrderId, InvoiceDate) VALUES (@orderId, @date)", conn);
+                    invoiceCmd.Parameters.AddWithValue("@orderId", orderId);
+                    invoiceCmd.Parameters.AddWithValue("@date", DateTime.Now);
+                    invoiceCmd.ExecuteNonQuery();
+                }
+            }
+            else if (newStatus == OrderStatus.Running)
+            {
+                // If setting back to running, remove from invoices
+                var deleteCmd = new SqlCommand("DELETE FROM Invoices WHERE OrderId = @orderId", conn);
+                deleteCmd.Parameters.AddWithValue("@orderId", orderId);
+                deleteCmd.ExecuteNonQuery();
+            }
+        }
     }
 }

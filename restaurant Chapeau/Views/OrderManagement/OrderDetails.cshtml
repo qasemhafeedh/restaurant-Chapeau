@@ -5,42 +5,109 @@
     ViewData["Title"] = "Order Details";
 }
 
-<h1>Order Details</h1>
-<div class="order-card">
-    <h3>Order ID: @Model.Id</h3>
-    <p><strong>Table:</strong> @Model.TableNumber</p>
-    <p><strong>Order Time:</strong> @Model.OrderTime.ToString("g")</p>
-    <p><strong>Status:</strong> @Model.Status</p>
-    @if (!string.IsNullOrEmpty(Model.comment))
-        {
-        <p><strong>Comment:</strong> @Model.comment</p>
-    }
-    <a asp-action="Orders" class="btn btn-secondary">Back to Orders List</a>
+<div class="order-details-header">
+    <h1>Order Details #@Model.Id</h1>
+    <a asp-action="Orders" class="btn btn-secondary">← Back to Orders</a>
+</div>
 
-    <h4>Items:</h4>
-    @foreach (var group in Model.Items.GroupBy(i => i.courseType))
+<div class="order-summary-card">
+    <div class="order-info-grid">
+        <div class="info-item">
+            <label>Order ID:</label>
+            <span class="value">#@Model.Id</span>
+        </div>
+        <div class="info-item">
+            <label>Table:</label>
+            <span class="value">@Model.TableNumber</span>
+        </div>
+        <div class="info-item">
+            <label>Order Time:</label>
+            <span class="value">@Model.OrderTime.ToString("g")</span>
+        </div>
+        <div class="info-item">
+            <label>Status:</label>
+            <span class="value status-badge status-@Model.Status.ToString().ToLower()">@Model.Status</span>
+        </div>
+    </div>
+    
+    @if (!string.IsNullOrEmpty(Model.comment))
     {
-        <div>
-            <strong>@group.Key</strong>
-            <ul>
-                @foreach (var item in group)
+        <div class="order-comment-section">
+            <label>Comment:</label>
+            <div class="comment-box">@Model.comment</div>
+        </div>
+    }
+
+    <!-- Order-level status controls -->
+    <div class="order-controls">
+        <form asp-action="UpdateOrderStatus" method="post" class="status-update-form">
+            <input type="hidden" name="orderId" value="@Model.Id" />
+            <input type="hidden" name="returnAction" value="OrderDetails" />
+            <label for="orderStatus">Change Order Status:</label>
+            <select name="newStatus" id="orderStatus" onchange="this.form.submit()" class="form-select">
+                <option value="">Select Status</option>
+                Running
+                Finished
+            </select>
+        </form>
+    </div>
+</div>
+
+<div class="items-section">
+    <h2>Order Items</h2>
+    
+    @foreach (var courseGroup in Model.Items.GroupBy(i => i.courseType).OrderBy(g => g.Key))
+    {
+        <div class="course-section">
+            <div class="course-header">
+                <h3 class="course-title">
+                    <i class="course-icon course-@courseGroup.Key.ToString().ToLower()"></i>
+                    @courseGroup.Key
+                    <span class="item-count">(@courseGroup.Count() items)</span>
+                </h3>
+                
+                <!-- Course-level status update -->
+                <form asp-action="UpdateCourseStatus" method="post" class="course-status-form">
+                    <input type="hidden" name="orderId" value="@Model.Id" />
+                    <input type="hidden" name="courseType" value="@courseGroup.Key" />
+                    <input type="hidden" name="returnAction" value="OrderDetails" />
+                    <label>Update All @courseGroup.Key:</label>
+                    <select name="newStatus" onchange="this.form.submit()" class="form-select course-select">
+                        <option value="">Change All</option>
+                        @foreach (var status in Enum.GetValues(typeof(ItemStatus)))
+                        {
+                            <option value="@status">@status</option>
+                        }
+                    </select>
+                </form>
+            </div>
+            
+            <div class="items-container">
+                @foreach (var item in courseGroup)
                 {
-                    <li>
-                        <span>@item.Name (@item.itemStatus)</span>
-                        <form asp-action="UpdateOrderItemStatus" asp-controller="OrderManagement" method="post" style="display:inline;">
+                    <div class="item-card item-@item.itemStatus.ToString().ToLower()">
+                        <div class="item-content">
+                            <div class="item-name">@item.Name</div>
+                            <div class="item-status-info">
+                                <span class="status-indicator"></span>
+                                <span class="status-text">@item.itemStatus</span>
+                            </div>
+                        </div>
+                        
+                        <form asp-action="UpdateOrderItemStatus" method="post" class="item-status-form">
                             <input type="hidden" name="itemId" value="@item.Id" />
                             <input type="hidden" name="orderId" value="@Model.Id" />
-                            <select name="newStatus">
+                            <input type="hidden" name="returnAction" value="OrderDetails" />
+                            <select name="newStatus" onchange="this.form.submit()" class="form-select item-select">
                                 @foreach (var status in Enum.GetValues(typeof(ItemStatus)))
                                 {
-                                    var isSelected = item.itemStatus == (ItemStatus)status ? "selected" : "";
+                                    @status
                                 }
                             </select>
-                            <button type="submit">Update</button>
                         </form>
-                    </li>
+                    </div>
                 }
-            </ul>
+            </div>
         </div>
     }
 </div>

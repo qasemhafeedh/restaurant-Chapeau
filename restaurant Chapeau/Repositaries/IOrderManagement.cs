@@ -1,5 +1,4 @@
 ﻿using restaurant_Chapeau.Models;
-using static restaurant_Chapeau.Models.OrderManagement;
 
 namespace restaurant_Chapeau.Services.Interfaces
 {
@@ -7,7 +6,10 @@ namespace restaurant_Chapeau.Services.Interfaces
     {
         List<Orders> GetAllOrders();
         List<Orders> GetRunningOrders(List<Orders> orders);
+        List<Orders> GetFinishedOrders(List<Orders> orders);
         Orders GetOrderById(int orderId);
-        void UpdateOrderItemStatus(int orderId, OrderStatus newStatus);
+        void UpdateOrderItemStatus(int itemId, ItemStatus newStatus);
+        void UpdateCourseStatus(int orderId, CourseType courseType, ItemStatus newStatus);
+        void UpdateOrderStatus(int orderId, OrderStatus newStatus);
     }
 }

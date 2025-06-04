@@ -1,0 +1,187 @@
+﻿@model List<restaurant_Chapeau.Models.Orders>
+@using restaurant_Chapeau.Models
+
+@{
+    ViewData["Title"] = "Kitchen Orders";
+}
+
+<h1>Kitchen Orders - Food Only</h1>
+
+<div class="navigation-buttons">
+    <a asp-action="Orders" class="btn btn-secondary">All Orders</a>
+    <a asp-action="KitchenOrders" class="btn btn-primary active">Kitchen Orders</a>
+    <a asp-action="BarOrders" class="btn btn-secondary">Bar Orders</a>
+</div>
+
+<div class="orders-container">
+    @if (Model.Any())
+    {
+        @foreach (var order in Model)
+        {
+            <div class="order-card">
+                <div class="order-header">
+                    <h3>Order #@order.Id - Table @order.TableNumber</h3>
+                    <span class="order-time">@order.OrderTime.ToString("HH:mm")</span>
+                </div>
+                
+                @if (!string.IsNullOrEmpty(order.comment))
+                {
+                    <div class="order-comment">
+                        <strong>Comment:</strong> @order.comment
+                    </div>
+                }
+
+                <!-- Order-level status update -->
+                <div class="order-actions">
+                    <form asp-action="UpdateOrderStatus" method="post" style="display:inline;">
+                        <input type="hidden" name="orderId" value="@order.Id" />
+                        <input type="hidden" name="returnAction" value="KitchenOrders" />
+                        <label>Order Status:</label>
+                        <select name="newStatus" onchange="this.form.submit()">
+                            Running
+                            Finished
+                        </select>
+                    </form>
+                </div>
+
+                <!-- Food items grouped by course -->
+                @foreach (var courseGroup in order.Items.GroupBy(i => i.courseType).OrderBy(g => g.Key))
+                {
+                    <div class="course-section">
+                        <div class="course-header">
+                            <h4>@courseGroup.Key</h4>
+                            <!-- Course-level status update -->
+                            <form asp-action="UpdateCourseStatus" method="post" class="course-status-form">
+                                <input type="hidden" name="orderId" value="@order.Id" />
+                                <input type="hidden" name="courseType" value="@courseGroup.Key" />
+                                <input type="hidden" name="returnAction" value="KitchenOrders" />
+                                <select name="newStatus" onchange="this.form.submit()" class="course-status-select">
+                                    <option value="">Update All @courseGroup.Key</option>
+                                    @foreach (var status in Enum.GetValues(typeof(ItemStatus)))
+                                    {
+                                        <option value="@status">@status</option>
+                                    }
+                                </select>
+                            </form>
+                        </div>
+                        
+                        <ul class="item-list">
+                            @foreach (var item in courseGroup)
+                            {
+                                <li class="item @item.itemStatus.ToString().ToLower()">
+                                    <span class="item-name">@item.Name</span>
+                                    <span class="item-status">(@item.itemStatus)</span>
+                                    
+                                    <!-- Individual item status update -->
+                                    <form asp-action="UpdateOrderItemStatus" method="post" class="item-status-form">
+                                        <input type="hidden" name="itemId" value="@item.Id" />
+                                        <input type="hidden" name="orderId" value="@order.Id" />
+                                        <input type="hidden" name="returnAction" value="KitchenOrders" />
+                                        <select name="newStatus" onchange="this.form.submit()">
+                                            @foreach (var status in Enum.GetValues(typeof(ItemStatus)))
+                                            {
+                                                @status
+                                            }
+                                        </select>
+                                    </form>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                }
+                <hr />
+            </div>
+        }
+    }
+    else
+    {
+        <p>No food orders currently running.</p>
+    }
+</div>
+
+<style>
+    .order-card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+        background-color: #f9f9f9;
+    }
+    
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    .order-time {
+        font-weight: bold;
+        color: #666;
+    }
+    
+    .order-comment {
+        background-color: #fff3cd;
+        padding: 8px;
+        border-radius: 4px;
+        margin-bottom: 10px;
+    }
+    
+    .course-section {
+        margin-bottom: 15px;
+        border-left: 3px solid #007bff;
+        padding-left: 10px;
+    }
+    
+    .course-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+    
+    .course-status-form {
+        display: inline;
+    }
+    
+    .course-status-select {
+        font-size: 12px;
+        padding: 2px 5px;
+    }
+    
+    .item-list {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px;
+        margin-bottom: 5px;
+        border-radius: 4px;
+    }
+    
+    .item.pending { background-color: #fff; border-left: 3px solid #ffc107; }
+    .item.preparing { background-color: #fff3cd; border-left: 3px solid #fd7e14; }
+    .item.ready { background-color: #d4edda; border-left: 3px solid #28a745; }
+    .item.served { background-color: #e2e3e5; border-left: 3px solid #6c757d; }
+    
+    .item-status-form {
+        display: inline;
+    }
+    
+    .navigation-buttons {
+        margin-bottom: 20px;
+    }
+    
+    .navigation-buttons .btn {
+        margin-right: 10px;
+    }
+    
+    .btn.active {
+        background-color: #007bff;
+        color: white;
+    }
+</style>
