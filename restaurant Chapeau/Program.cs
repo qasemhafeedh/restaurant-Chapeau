@@ -29,6 +29,9 @@ builder.Services.AddScoped<IStockService, StockService>(); // ✅  stock service
 builder.Services.AddScoped<IMenuRepository, MenuRepository>();
 builder.Services.AddScoped<IMenuService, MenuService>();
 
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();    
+
 var app = builder.Build();
 
 // ✅ Error handling

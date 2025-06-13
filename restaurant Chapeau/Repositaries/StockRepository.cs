@@ -36,7 +36,7 @@ namespace restaurant_Chapeau.Repositories
                     MenuType = reader["MenuType"].ToString(),
                     RoutingTarget = reader["RoutingTarget"].ToString()
                 });
-            }
+            } // mapping in one single method
 
             return items;
         }
@@ -65,7 +65,6 @@ namespace restaurant_Chapeau.Repositories
                     RoutingTarget = reader["RoutingTarget"].ToString()
                 };
             }
-
             return null;
         }
 
