@@ -1,0 +1,197 @@
+﻿﻿
+@model restaurant_Chapeau.Models.OrderSubmission
+@using restaurant_Chapeau.Models
+@{
+    ViewData["Title"] = "Order Cart";
+}
+
+<div class="container mt-5 pt-5">
+    <h2 class="mb-4">Order Cart</h2>
+
+    <div id="cartContainer"></div>
+
+    <form method="post" asp-action="SubmitOrder" id="orderForm" onsubmit="return validateOrderForm();">
+
+        <div id="cartItemsForm"></div>
+
+        <div class="mb-4">
+            <label class="form-label fw-bold">Select a Table</label>
+            <div class="d-flex flex-wrap gap-3">
+                @foreach (var table in (List<RestaurantTable>)ViewBag.Tables)
+                {
+                    var now = DateTime.Now;
+                    var isBusy = table.ReservationStart.HasValue && table.ReservationEnd.HasValue &&
+                    now >= table.ReservationStart && now <= table.ReservationEnd;
+
+                    var isDisabled = isBusy ? "disabled" : "";
+                    var btnClass = isBusy ? "btn-secondary" : "btn-outline-primary";
+
+                    <button type="button"
+                            class="btn @btnClass table-btn text-center"
+                            data-table="@table.TableID"
+                            onclick="selectTable(this)"
+                            style="width: 100px;"
+                    @isDisabled>
+                        <div>Table @table.TableNumber</div>
+                        <small class="d-block @(isBusy ? "text-danger" : "text-success")">
+                            @if (isBusy)
+                            {
+                                <text>
+                                    Reserved<br />
+                                    @table.ReservationStart.Value.ToString("HH:mm") -
+                                    @table.ReservationEnd.Value.ToString("HH:mm")
+                                </text>
+                            }
+                            else
+                            {
+                                <text>Available</text>
+                            }
+                        </small>
+                    </button>
+                }
+            </div>
+            <input type="hidden" name="TableID" id="SelectedTableID" required />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Comment</label>
+            <textarea name="Comment" class="form-control"></textarea>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Tip Amount (€)</label>
+            <input type="number" name="TipAmount" class="form-control" step="0.01" min="0" value="0" />
+        </div>
+
+        
+        <div class="mb-3">
+            <strong>Total: €<span id="cartTotal">0.00</span></strong>
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <button type="submit" class="btn btn-success">Submit Order</button>
+            <button type="button" class="btn btn-outline-danger" onclick="cancelOrder()">Cancel Entire Order</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        const cart = JSON.parse(localStorage.getItem("cart")) || [];
+        const cartContainer = document.getElementById("cartContainer");
+        const cartItemsForm = document.getElementById("cartItemsForm");
+        const orderForm = document.getElementById("orderForm");
+        const cartTotal = document.getElementById("cartTotal");
+
+        function renderCart() {
+            cartContainer.innerHTML = "";
+            cartItemsForm.innerHTML = "";
+            let total = 0;
+
+            if (cart.length === 0) {
+                cartContainer.innerHTML = '<div class="alert alert-info">Your cart is empty.</div>';
+                orderForm.style.display = "none";
+                return;
+            }
+
+            orderForm.style.display = "block";
+
+            cart.forEach((item, index) => {
+                total += item.Price * item.Quantity;
+                const div = document.createElement("div");
+                div.className = "card mb-3 p-3";
+                div.innerHTML = `
+                    <strong>${item.Name}</strong>
+                    <div class="mb-1">Price: €${item.Price}</div>
+                    <div class="mb-1">
+                        Quantity: <input type="number" value="${item.Quantity}" class="form-control" min="1" onchange="updateQuantity(${index}, this.value)" />
+                    </div>
+                    <div class="mb-1">
+                        Note: <input type="text" value="${item.Note || ''}" class="form-control" onchange="updateNote(${index}, this.value)" />
+                    </div>
+                    <button type="button" class="btn btn-sm btn-danger mt-2" onclick="removeItem(${index})">Remove</button>
+                `;
+                cartContainer.appendChild(div);
+
+                cartItemsForm.innerHTML += `
+                    <input type="hidden" name="CartItems[${index}].MenuItemID" value="${item.MenuItemID}" />
+                    <input type="hidden" name="CartItems[${index}].Name" value="${item.Name}" />
+                    <input type="hidden" name="CartItems[${index}].Price" value="${item.Price}" />
+                    <input type="hidden" name="CartItems[${index}].Quantity" value="${item.Quantity}" />
+                    <input type="hidden" name="CartItems[${index}].Note" value="${item.Note}" />
+                    <input type="hidden" name="CartItems[${index}].RoutingTarget" value="${item.RoutingTarget}" />
+                `;
+            });
+
+            cartTotal.textContent = total.toFixed(2);
+        }
+
+        function updateQuantity(index, value) {
+            cart[index].Quantity = parseInt(value);
+            saveCart();
+            renderCart();
+        }
+
+        function updateNote(index, value) {
+            cart[index].Note = value;
+            saveCart();
+        }
+
+        function removeItem(index) {
+            cart.splice(index, 1);
+            saveCart();
+            renderCart();
+        }
+             function validateOrderForm() {
+            const selectedTable = document.getElementById("SelectedTableID").value;
+            if (!selectedTable) {
+                alert("⚠️ Please select a table before submitting the order.");
+                return false; // Prevent form submission
+            }
+
+            clearCart(); // Only clear cart if valid
+            return true;
+        }
+
+        function saveCart() {
+            localStorage.setItem("cart", JSON.stringify(cart));
+        }
+
+        function clearCart() {
+            localStorage.removeItem("cart");
+        }
+
+        function cancelOrder() {
+            if (confirm("Are you sure you want to cancel the entire order?")) {
+                clearCart();
+                location.reload();
+            }
+        }
+
+        function selectTable(button) {
+            if (button.hasAttribute("disabled")) return;
+
+            const selectedId = button.getAttribute("data-table");
+            document.getElementById("SelectedTableID").value = selectedId;
+
+            document.querySelectorAll(".table-btn").forEach(btn => {
+                if (!btn.hasAttribute("disabled")) {
+                    btn.classList.remove("btn-primary");
+                    btn.classList.add("btn-outline-primary");
+                }
+            });
+
+            button.classList.remove("btn-outline-primary");
+            button.classList.add("btn-primary");
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            renderCart();
+
+            // ✅ Show order feedback
+        @if (TempData["OrderStatus"] != null)
+        {
+            <text>alert("@TempData["OrderStatus"]");</text>
+        }
+        });
+    </script>
+}
