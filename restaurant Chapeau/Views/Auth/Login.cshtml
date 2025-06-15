@@ -12,28 +12,24 @@
             <p class="text-muted">Please log in to continue</p>
         </div>
 
+        @* Show login error from TempData, if present *@
+        @if (TempData["LoginMessage"] != null)
+        {
+            <div class="alert alert-danger text-center" role="alert">
+                @TempData["LoginMessage"]
+            </div>
+        }
+
         <form asp-action="Login" method="post" id="loginForm">
             <div class="form-group mb-3">
-                <label asp-for="Role" class="form-label">Role</label>
-                <select asp-for="Role" class="form-select" id="roleSelect" onchange="enableLoginFields()">
-                    <option value="">-- Select Role --</option>
-                    <option value="Manager">Manager</option>
-                    <option value="Waiter">Waiter</option>
-                    <option value="Kitchen">Kitchen</option>
-                    <option value="Bar">Bar</option>
-                </select>
-                <span asp-validation-for="Role" class="text-danger small"></span>
-            </div>
-
-            <div class="form-group mb-3">
                 <label asp-for="Username" class="form-label">Username</label>
-                <input asp-for="Username" class="form-control" id="usernameInput" disabled />
+                <input asp-for="Username" class="form-control" />
                 <span asp-validation-for="Username" class="text-danger small"></span>
             </div>
 
             <div class="form-group mb-4">
                 <label asp-for="Password" class="form-label">Password</label>
-                <input asp-for="Password" type="password" class="form-control" id="passwordInput" disabled />
+                <input asp-for="Password" type="password" class="form-control" />
                 <span asp-validation-for="Password" class="text-danger small"></span>
             </div>
 
@@ -46,30 +42,4 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-
-    <script>
-        function enableLoginFields() {
-            var role = document.getElementById("roleSelect").value;
-            var usernameInput = document.getElementById("usernameInput");
-            var passwordInput = document.getElementById("passwordInput");
-
-            if (role !== "") {
-                usernameInput.disabled = false;
-                passwordInput.disabled = false;
-            } else {
-                usernameInput.disabled = true;
-                passwordInput.disabled = true;
-            }
-        }
-
-        window.onload = function () {
-            enableLoginFields(); // re-evaluate role on page reload
-
-        @* Show alert if login message exists *@
-            var message = '@TempData["LoginMessage"]';
-            if (message) {
-                alert(message);
-            }
-        };
-    </script>
 }

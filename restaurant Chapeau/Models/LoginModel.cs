@@ -11,7 +11,6 @@ namespace restaurant_Chapeau.Models
         [DataType(DataType.Password)]
         public string Password { get; set; }
 
-        [Required(ErrorMessage = "Role is required")]
-        public string Role { get; set; } // e.g., Manager or Waiter
+        
     }
 }

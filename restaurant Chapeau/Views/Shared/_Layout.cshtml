@@ -1,7 +1,14 @@
 ﻿@using Microsoft.AspNetCore.Http
+
 @{
     var userId = Context.Session.GetInt32("UserID");
     var role = Context.Session.GetString("Role");
+
+    var controller = ViewContext.RouteData.Values["Controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["Action"]?.ToString();
+
+    // Hide navbar on public pages like Login
+    var hideNav = controller == "Auth" && action == "Login";
 }
 
 <!DOCTYPE html>
@@ -14,12 +21,10 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/restaurant_Chapeau.styles.css" asp-append-version="true" />
     <link rel="icon" type="image/png" href="~/img/Picture1.png" />
-    
-    
 </head>
 <body>
     <header>
-        @if (userId != null)
+        @if (userId != null && !hideNav)
         {
             <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm fixed-top">
                 <div class="container-fluid">
@@ -27,24 +32,24 @@
                     <a class="navbar-brand d-flex align-items-center" asp-controller="Home" asp-action="Index">
                         <img src="~/img/Picture1.png" alt="Logo" style="height: 40px; width: auto; margin-right: 10px;" />
                         <strong class="fs-5" style="color: black;">Chapeau Restaurant</strong>
-
                     </a>
 
-                    <!-- Cart (optional, from layout section) -->
+                    <!-- Cart or other header content -->
                     <div class="d-flex align-items-center">
                         @RenderSection("HeaderCart", required: false)
 
-                        <!-- Toggler (for mobile view) -->
+                        <!-- Toggler (for mobile) -->
                         <button class="navbar-toggler ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
                                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                             <span class="navbar-toggler-icon"></span>
                         </button>
                     </div>
 
-                    <!-- Navigation links -->
+                    <!-- Navigation -->
                     <div class="collapse navbar-collapse justify-content-between" id="navbarSupportedContent">
                         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                            @if (role == "Waiter" || role == "Manager")
+                           @if (userId != null && !hideNav && (role == "Manager" || role == "Waiter"))
+
                             {
                                 <li class="nav-item me-3">
                                     <a class="nav-link fw-semibold" asp-controller="Order" asp-action="Menu">Menu</a>
@@ -52,6 +57,9 @@
                             }
                             @if (role == "Manager")
                             {
+                                <li class="nav-item me-3">
+                                    <a class="nav-link fw-semibold" asp-controller="Order" asp-action="Menu">Menu</a>
+                                </li>
                                 <li class="nav-item me-3">
                                     <a class="nav-link fw-semibold" asp-controller="Menu" asp-action="ManageMenu">Manage Menu</a>
                                 </li>
@@ -65,27 +73,24 @@
                             @if (role == "Kitchen")
                             {
                                 <li class="nav-item me-3">
-                                    <a class="nav-link fw-semibold" asp-controller="KitchenBar" asp-action="KitchenRunningOrders">Running Orders </a>
+                                    <a class="nav-link fw-semibold" asp-controller="KitchenBar" asp-action="KitchenRunningOrders">Running Orders</a>
                                 </li>
                                 <li class="nav-item me-3">
-                                    <a class="nav-link fw-semibold" asp-controller="KitchenBar" asp-action="KitchenFinishedOrders">Finished Orders </a>
+                                    <a class="nav-link fw-semibold" asp-controller="KitchenBar" asp-action="KitchenFinishedOrders">Finished Orders</a>
                                 </li>
-
                             }
                             @if (role == "Bar")
                             {
                                 <li class="nav-item me-3">
-                                    <a class="nav-link fw-semibold" asp-controller="KitchenBar" asp-action="BarRunningOrders">Running Orders </a>
+                                    <a class="nav-link fw-semibold" asp-controller="KitchenBar" asp-action="BarRunningOrders">Running Orders</a>
                                 </li>
                                 <li class="nav-item me-3">
-                                    <a class="nav-link fw-semibold" asp-controller="KitchenBar" asp-action="BarFinishedOrders">Finished Orders </a>
+                                    <a class="nav-link fw-semibold" asp-controller="KitchenBar" asp-action="BarFinishedOrders">Finished Orders</a>
                                 </li>
-
                             }
                         </ul>
 
-
-                        <!-- Right side: Logout -->
+                        <!-- Logout -->
                         <ul class="navbar-nav">
                             <li class="nav-item">
                                 <a class="btn btn-outline-danger" asp-controller="Auth" asp-action="Logout">Logout</a>
@@ -94,12 +99,10 @@
                     </div>
                 </div>
             </nav>
-            
-
         }
     </header>
 
-    <div class="container">
+    <div class="container pt-5 mt-5">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>

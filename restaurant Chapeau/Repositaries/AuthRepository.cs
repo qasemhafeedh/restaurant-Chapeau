@@ -12,25 +12,24 @@ namespace restaurant_Chapeau.Repositories
             _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
-        public async Task<bool> ValidateUserAsync(string username, string password, string role)
+        // Validate only username and password (no role)
+        public async Task<bool> ValidateUserAsync(string username, string password)
         {
             using SqlConnection conn = new(_connectionString);
             await conn.OpenAsync();
 
-            var cmd = new SqlCommand(@"
-                SELECT COUNT(*) 
-                FROM Users 
-                WHERE Username = @username AND Password = @password AND Role = @role", conn);
+            string query = "SELECT COUNT(*) FROM Users WHERE Username = @username AND PasswordHash = @password";
 
+            var cmd = new SqlCommand(query, conn);
             cmd.Parameters.AddWithValue("@username", username);
             cmd.Parameters.AddWithValue("@password", password);
-            cmd.Parameters.AddWithValue("@role", role);
 
             int result = (int)await cmd.ExecuteScalarAsync();
             return result > 0;
         }
 
-        public async Task<User> GetUserByUsernameAsync(string username)
+        // Get full user info by username
+        public async Task<User?> GetUserByUsernameAsync(string username)
         {
             using SqlConnection conn = new(_connectionString);
             await conn.OpenAsync();
@@ -45,6 +44,7 @@ namespace restaurant_Chapeau.Repositories
                 {
                     UserID = (int)reader["UserID"],
                     Username = reader["Username"].ToString(),
+                    PasswordHash = reader["PasswordHash"].ToString(),
                     Role = reader["Role"].ToString()
                 };
             }
@@ -53,4 +53,3 @@ namespace restaurant_Chapeau.Repositories
         }
     }
 }
-

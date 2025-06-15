@@ -17,26 +17,25 @@ namespace restaurant_Chapeau.Controllers
         public IActionResult Login() => View();
 
         [HttpPost]
-        [HttpPost]
         public async Task<IActionResult> Login(LoginModel model)
         {
             if (!ModelState.IsValid)
                 return View(model);
 
-            var user = await _authService.AuthenticateAsync(model.Username, model.Password, model.Role);
+            var user = await _authService.AuthenticateAsync(model.Username, model.Password);
+
             if (user != null)
             {
                 HttpContext.Session.SetString("Username", user.Username);
                 HttpContext.Session.SetString("Role", user.Role);
-                HttpContext.Session.SetInt32("UserID", user.UserID); // ✅ Set correct user ID
+                HttpContext.Session.SetInt32("UserID", user.UserID);
 
                 return RedirectToAction("Menu", "Order");
             }
 
-            ModelState.AddModelError("", "Invalid credentials.");
-            return View(model);
+            TempData["LoginMessage"] = "Invalid username or password.";
+            return RedirectToAction("Login");
         }
-
 
         public IActionResult Logout()
         {
