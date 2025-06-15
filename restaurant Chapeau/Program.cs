@@ -21,6 +21,9 @@ builder.Services.AddSession(options =>
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 
+builder.Services.AddScoped<IKitchenBarService, KitchenBarService>();
+builder.Services.AddScoped<IKitchenBarRepository, KitchenBarRepository>();
+
 builder.Services.AddScoped<IAuthService, AuthService>(); // ✅ Required for AuthController
 
 builder.Services.AddScoped<IStockRepository, StockRepository>(); // ✅  stock repository.  this connects the interface to the DB logic
