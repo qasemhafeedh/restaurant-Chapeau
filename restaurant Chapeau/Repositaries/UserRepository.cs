@@ -1,5 +1,4 @@
-﻿
-using global::restaurant_Chapeau.Models;
+﻿using global::restaurant_Chapeau.Models;
 using restaurant_Chapeau.Models;
 using restaurant_Chapeau.Repositaries;
 using System.Collections.Generic;
@@ -19,7 +18,7 @@ namespace restaurant_Chapeau.Repositories
         public List<User> GetAllUsers()
         {
             List<User> users = new List<User>();
-
+            
             using (SqlConnection conn = new SqlConnection(_connectionString))
             {
                 conn.Open();
