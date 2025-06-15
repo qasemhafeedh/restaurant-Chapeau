@@ -1,0 +1,128 @@
+﻿@model List<restaurant_Chapeau.Models.Order>
+@using restaurant_Chapeau.Models
+@using static restaurant_Chapeau.Models.Order
+@{
+    ViewData["Title"] = "Running Orders";
+}
+<h1>Running Bar Orders</h1>
+<div class="orders-container">
+    @foreach (var order in Model.Where(o => o.Items.Any(i => i.target == RoutingTarget.Bar)))
+    {
+        <div class="order-card">
+            <h3>Order #@order.Id</h3>
+            <p><strong>Table:</strong> @order.TableNumber</p>
+            <p><strong>Time:</strong> @order.OrderTime.ToString("HH:mm")</p>
+            <p><strong>Status:</strong> @order.Status</p>
+            @if (!string.IsNullOrEmpty(order.comment))
+            {
+                <p><strong>Comment:</strong> @order.comment</p>
+            }
+            @foreach (var item in order.Items.Where(i => i.target == RoutingTarget.Bar))
+            {
+                <div class="item-entry">
+                    <div class="item-info">
+                        <strong>@item.Name</strong>
+                        <span class="current-status status-tag @item.itemStatus.ToString().ToLower()">
+                            @item.itemStatus
+                        </span>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(item.Note))
+                    {
+                        <div class="item-note">Note: @item.Note</div>
+                    }
+                    <div class="item-status-buttons">
+                        @foreach (var status in Enum.GetValues(typeof(ItemStatus)).Cast<ItemStatus>())
+                        {
+                            <form asp-action="UpdateBarOrderItemStatus" asp-controller="KitchenBar" method="post" style="display:inline;">
+                                <input type="hidden" name="itemId" value="@item.Id" />
+                                <input type="hidden" name="orderId" value="@order.Id" />
+                                <input type="hidden" name="newStatus" value="@status" />
+                                <button type="submit"
+                                        class="status-btn @status.ToString().ToLower() @(item.itemStatus == status ? "current" : "")"
+                                @(item.itemStatus == status ? "disabled" : "")>
+                                    @status
+                                </button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+<style>
+    .orders-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .order-card {
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        min-width: 300px;
+    }
+
+    .item-entry {
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+        background: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    .item-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .status-tag {
+        padding: 0.2rem 0.5rem;
+        border-radius: 3px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+
+    .item-note {
+        font-style: italic;
+        color: #666;
+        margin-bottom: 0.5rem;
+    }
+
+    .item-status-buttons {
+        margin-top: 0.5rem;
+    }
+
+    .status-btn {
+        margin-right: 0.5rem;
+        margin-bottom: 0.2rem;
+        padding: 0.3rem 0.8rem;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        background: #fff;
+        cursor: pointer;
+        font-size: 0.8rem;
+    }
+
+        .status-btn:hover:not(:disabled) {
+            background: #f0f0f0;
+        }
+
+        .status-btn.current {
+            background: #007bff;
+            color: white;
+            cursor: not-allowed;
+        }
+
+        .status-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+</style>
