@@ -21,16 +21,19 @@ builder.Services.AddSession(options =>
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 
-builder.Services.AddScoped<IAuthService, AuthService>(); // ✅ Required for AuthController
+builder.Services.AddScoped<IAuthService, AuthService>(); //  Required for AuthController
 
-builder.Services.AddScoped<IStockRepository, StockRepository>(); // ✅  stock repository.  this connects the interface to the DB logic
-builder.Services.AddScoped<IStockService, StockService>(); // ✅  stock service.  t
+builder.Services.AddScoped<IStockRepository, StockRepository>(); //   stock repository.  this connects the interface to the DB logic
+builder.Services.AddScoped<IStockService, StockService>(); //   stock service.  t
 
 builder.Services.AddScoped<IMenuRepository, MenuRepository>();
 builder.Services.AddScoped<IMenuService, MenuService>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IUserService, UserService>();    
+builder.Services.AddScoped<IUserService, UserService>();
+
+builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
+builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 
 var app = builder.Build();
 
