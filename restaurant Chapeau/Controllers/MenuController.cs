@@ -9,7 +9,7 @@ public class MenuController : Controller
     private readonly IMenuService _menuService;
 
     public IActionResult ManageMenu(string menuType, string category)
-    {
+    {   // ppass it down to the repository
 
         //  Get all menu items from the database
         List<MenuItem> items = _menuService.GetAllItems();

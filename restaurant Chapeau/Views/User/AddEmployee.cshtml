@@ -1,0 +1,33 @@
+﻿@model restaurant_Chapeau.Models.User
+
+<div class="container mt-5 pt-5">
+    <h2>Add New Employee</h2>
+
+    <form method="post">
+        <div class="mb-3">
+            <label>Full Name</label>
+            <input type="text" name="FullName" class="form-control" required />
+        </div>
+
+        <div class="mb-3">
+            <label>Username</label>
+            <input type="text" name="Username" class="form-control" required />
+        </div>
+
+        <div class="mb-3">
+            <label>Password</label>
+            <input type="text" name="PasswordHash" class="form-control" required />
+        </div>
+
+        <div class="mb-3">
+            <label>Role</label>
+            <select name="Role" class="form-select">
+                <option>Manager</option>
+                <option>Waiter</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-success">Add</button>
+        <a href="/User/ManageEmployees" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>

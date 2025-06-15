@@ -1,0 +1,38 @@
+﻿@model List<restaurant_Chapeau.Models.User>
+
+<div class="container mt-5 pt-5">
+    <h2>Manage Employees</h2>
+
+    <!-- Add New Employee Button -->
+    <a href="/User/Add" class="btn btn-success mb-3">Add New Employee</a>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Full Name</th>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr class="@(user.IsActive ? "" : "table-danger")">
+                    <td>@user.FullName</td>
+                    <td>@user.Username</td>
+                    <td>@user.Role</td>
+                    <td>@(user.IsActive ? "Active" : "Inactive")</td>
+                    <td>
+                        <a href="/User/Edit/@user.UserID" class="btn btn-primary btn-sm">Edit</a>
+                        <a href="/User/ToggleActive/@user.UserID"
+                           class="btn @(user.IsActive ? "btn-warning" : "btn-success") btn-sm">
+                            @(user.IsActive ? "Deactivate" : "Activate")
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

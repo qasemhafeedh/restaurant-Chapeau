@@ -37,8 +37,8 @@ namespace restaurant_Chapeau.Repositories
                     QuantityAvailable = (int)reader["QuantityAvailable"],
                     MenuType = reader["MenuType"].ToString(),
                     RoutingTarget = reader["RoutingTarget"].ToString(),
-                     IsActive = (bool)reader["IsActive"] //for the activeate button
-                });
+					IsActive = reader["IsActive"] != DBNull.Value ? (bool)reader["IsActive"] : false//for the activeate button. .NET cannot convert NULL to bool directly.
+				});
             }
 
             return items;
