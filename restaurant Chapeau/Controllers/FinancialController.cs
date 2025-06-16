@@ -16,40 +16,63 @@ namespace restaurant_Chapeau.Controllers
             _invoiceService = invoiceService;
         }
 
-        public IActionResult Overview(DateTime? start, DateTime? end)
+        public IActionResult Overview(DateTime? start, DateTime? end, string period) //? can be null
         {
-            DateTime startDate = start ?? DateTime.Today.AddMonths(-1); // default: last month
-            DateTime endDate = end ?? DateTime.Today;
+            DateTime startDate, endDate;
 
-            List<Invoice> invoices = _invoiceService.GetInvoicesByDateRange(startDate, endDate);
+            if (!string.IsNullOrEmpty(period))
+            {
+                endDate = DateTime.Today;
 
-            decimal totalRevenue = invoices.Sum(i => i.TotalAmount);
-            decimal totalTips = invoices.Sum(i => i.TipAmount);
-            decimal totalIncome = invoices.Sum(i => (i.TotalAmount - i.CostAmount));
+                switch (period.ToLower())
+                {
+                    case "month":
+                        startDate = endDate.AddMonths(-1);
+                        break;
+                    case "quarter":
+                        startDate = endDate.AddMonths(-3);
+                        break;
+                    case "year":
+                        startDate = endDate.AddYears(-1);
+                        break;
+                    default:
+                        startDate = end ?? DateTime.Today;
+                        break;
+                }
+            }
+            else
+            {
+                // Fallback to default 1 month
+                startDate = start ?? DateTime.Today.AddMonths(-1);
+                endDate = end ?? DateTime.Today;
+            }
 
-            // Example classification: simple keyword check (can be replaced with smarter logic)
-            decimal lunchSales = invoices.Where(i => i.InvoiceNumber.Contains("LUNCH")).Sum(i => i.TotalAmount);
-            decimal dinnerSales = invoices.Where(i => i.InvoiceNumber.Contains("DINNER")).Sum(i => i.TotalAmount);
-            decimal drinkSales = invoices.Where(i => i.InvoiceNumber.Contains("DRINK")).Sum(i => i.TotalAmount);
 
-            decimal lunchIncome = invoices.Where(i => i.InvoiceNumber.Contains("LUNCH")).Sum(i => (i.TotalAmount - i.CostAmount));
-            decimal dinnerIncome = invoices.Where(i => i.InvoiceNumber.Contains("DINNER")).Sum(i => (i.TotalAmount - i.CostAmount));
-            decimal drinkIncome = invoices.Where(i => i.InvoiceNumber.Contains("DRINK")).Sum(i => (i.TotalAmount - i.CostAmount));
+            var invoices = _invoiceService.GetInvoicesByDateRange(startDate, endDate);
 
-            ViewBag.StartDate = startDate.ToShortDateString();
-            ViewBag.EndDate = endDate.ToShortDateString();
-            ViewBag.LunchSales = lunchSales;
-            ViewBag.DinnerSales = dinnerSales;
-            ViewBag.DrinkSales = drinkSales;
-            ViewBag.TotalRevenue = totalRevenue;
-            ViewBag.TotalTips = totalTips;
-
-            ViewBag.LunchIncome = lunchIncome;
-            ViewBag.DinnerIncome = dinnerIncome;
-            ViewBag.DrinkIncome = drinkIncome;
-            ViewBag.TotalIncome = totalIncome;
+            SetViewBagFinancials(invoices, startDate, endDate);
 
             return View();
+        }
+
+        private void SetViewBagFinancials(List<Invoice> invoices, DateTime startDate, DateTime endDate)
+        {
+            ViewBag.StartDate = startDate.ToShortDateString();
+            ViewBag.EndDate = endDate.ToShortDateString();
+
+            ViewBag.TotalRevenue = invoices.Sum(i => i.TotalAmount);
+            ViewBag.TotalTips = invoices.Sum(i => i.TipAmount);
+            ViewBag.TotalIncome = invoices.Sum(i => i.TotalAmount - i.CostAmount);
+
+            (ViewBag.LunchSales, ViewBag.LunchIncome) = CalcByKeyword(invoices, "LUNCH");
+            (ViewBag.DinnerSales, ViewBag.DinnerIncome) = CalcByKeyword(invoices, "DINNER");
+            (ViewBag.DrinkSales, ViewBag.DrinkIncome) = CalcByKeyword(invoices, "DRINK");
+        }
+
+        private (decimal sales, decimal income) CalcByKeyword(List<Invoice> invoices, string keyword)
+        {
+            var items = invoices.Where(i => i.InvoiceNumber.Contains(keyword));
+            return (items.Sum(i => i.TotalAmount), items.Sum(i => i.TotalAmount - i.CostAmount));
         }
     }
 }
