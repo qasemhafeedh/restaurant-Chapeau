@@ -5,11 +5,11 @@ using restaurant_Chapeau.Repositaries;
 
 namespace restaurant_Chapeau.Repositories
 {
-    public class MenuRepository : IMenuRepository
+    public class MenuManagementRepository : IMenuManagementRepository
     {
         private readonly string _connectionString;
 
-        public MenuRepository(IConfiguration config)
+        public MenuManagementRepository(IConfiguration config)
         {
             _connectionString = config.GetConnectionString("DefaultConnection");
         }

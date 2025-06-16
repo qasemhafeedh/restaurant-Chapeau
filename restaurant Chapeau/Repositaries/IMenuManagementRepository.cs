@@ -1,20 +1,15 @@
 ﻿using restaurant_Chapeau.Models;
-using System.Collections.Generic;
 
-namespace restaurant_Chapeau.Services.Interfaces
+namespace restaurant_Chapeau.Repositaries
 {
-    public interface IMenuService
-    { 
-        //ADD
+    public  interface IMenuManagementRepository
+    {
         List<MenuItem> GetAllItems();
         void AddItem(MenuItem item);
-   
-
         //EDIT
         MenuItem GetItemById(int id);
         void UpdateItem(MenuItem item);
-
-        //ACtivate button method
+        //Activate mennu item
         void ToggleActive(int id);
     }
 }

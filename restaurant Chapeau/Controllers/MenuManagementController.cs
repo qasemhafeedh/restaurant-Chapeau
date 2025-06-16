@@ -4,9 +4,9 @@ using restaurant_Chapeau.Repositaries;
 using restaurant_Chapeau.Services;
 using restaurant_Chapeau.Services.Interfaces;
 
-public class MenuController : Controller
+public class MenuManagementController : Controller
 {
-    private readonly IMenuService _menuService;
+    private readonly IMenuManagementService _menuService;
 
     public IActionResult ManageMenu(string menuType, string category)
     {   // ppass it down to the repository
@@ -33,7 +33,7 @@ public class MenuController : Controller
         return View(items);
     }
 
-    public MenuController(IMenuService menuService)
+    public MenuManagementController(IMenuManagementService menuService)
     {
         _menuService = menuService;
     }

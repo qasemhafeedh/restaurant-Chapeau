@@ -12,7 +12,7 @@ namespace restaurant_Chapeau.Repositories
             _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
-        // Validate only username and password (no role)
+        // Validate only username and password 
         public async Task<bool> ValidateUserAsync(string username, string password)
         {
             using SqlConnection conn = new(_connectionString);

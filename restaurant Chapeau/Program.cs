@@ -25,8 +25,8 @@ builder.Services.AddScoped<IKitchenBarService, KitchenBarService>();
 builder.Services.AddScoped<IStockRepository, StockRepository>();
 builder.Services.AddScoped<IStockService, StockService>();
 
-builder.Services.AddScoped<IMenuRepository, MenuRepository>();
-builder.Services.AddScoped<IMenuService, MenuService>();
+builder.Services.AddScoped<IMenuManagementRepository, MenuManagementRepository>();
+builder.Services.AddScoped<IMenuManagementService, MenuManagementService>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
