@@ -1,4 +1,5 @@
 ﻿using System.Data.SqlClient;
+using restaurant_Chapeau.Enums;
 using restaurant_Chapeau.Models;
 using restaurant_Chapeau.Repositaries;
 
@@ -20,7 +21,10 @@ namespace restaurant_Chapeau.Repositories
             await conn.OpenAsync();
 
             var cmd = new SqlCommand("SELECT * FROM MenuItems", conn);
-            using var reader = await cmd.ExecuteReaderAsync();
+            using var reader = await cmd.ExecuteReaderAsync();/*This is a key ADO.NET method for executing a SQL query 
+                      and reading results — especially when you're expecting multiple rows or columns, like from a SELECT query.*/
+
+
 
             while (await reader.ReadAsync())
             {
@@ -28,14 +32,14 @@ namespace restaurant_Chapeau.Repositories
                 {
                     MenuItemID = (int)reader["MenuItemID"],
                     Name = reader["Name"].ToString(),
-                    Category = reader["Category"].ToString(),
-                    Price = (decimal)reader["Price"],
+					Category = Enum.Parse<Category>(reader["Category"].ToString()),
+					Price = (decimal)reader["Price"],
                     IsAlcoholic = (bool)reader["IsAlcoholic"],
                     VATRate = (decimal)reader["VATRate"],
                     QuantityAvailable = (int)reader["QuantityAvailable"],
-                    MenuType = reader["MenuType"].ToString(),
-                    RoutingTarget = reader["RoutingTarget"].ToString()
-                });
+					MenuType = Enum.Parse<MenuType>(reader["MenuType"].ToString()),
+					RoutingTarget = Enum.Parse<RoutingTarget>(reader["RoutingTarget"].ToString()),
+				});
             }
 
             return list;
@@ -113,11 +117,7 @@ namespace restaurant_Chapeau.Repositories
             await cmd.ExecuteNonQueryAsync();
         }
 
-        public async Task<int> CreateOrderAsync(int tableId, string comment)
-        {
-            // Only used if needed elsewhere
-            throw new NotImplementedException();
-        }
+    
 
         public async Task AddOrderItemsAsync(int orderId, List<CartItem> items)
         {

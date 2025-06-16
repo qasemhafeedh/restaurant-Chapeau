@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using restaurant_Chapeau.Models;
 using restaurant_Chapeau.Services.Interfaces;
 
@@ -27,8 +28,9 @@ namespace restaurant_Chapeau.Controllers
             if (user != null)
             {
                 HttpContext.Session.SetString("Username", user.Username);
-                HttpContext.Session.SetString("Role", user.Role);
-                HttpContext.Session.SetInt32("UserID", user.UserID);
+
+                HttpContext.Session.SetString("Role", user.Role.ToString());
+                HttpContext.Session.SetInt32("UserID", user.UserID); // ✅ Set correct user ID
 
                 return RedirectToAction("Menu", "Order");
             }

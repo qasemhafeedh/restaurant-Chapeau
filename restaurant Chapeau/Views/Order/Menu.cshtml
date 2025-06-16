@@ -4,37 +4,37 @@
  @using restaurant_Chapeau.Models
 
 
+@using restaurant_Chapeau.Enums
 @{
     ViewData["Title"] = "Menu";
 
-    var lunchStarters = Model.Where(m => m.MenuType == "Lunch" && m.Category == "Starter").ToList();
-    var lunchMains = Model.Where(m => m.MenuType == "Lunch" && m.Category == "Main").ToList();
-    var lunchDesserts = Model.Where(m => m.MenuType == "Lunch" && m.Category == "Dessert").ToList();
+    var lunchStarters = Model.Where(m => m.MenuType == MenuType.Lunch && m.Category == Category.Starter).ToList();
+    var lunchMains = Model.Where(m => m.MenuType == MenuType.Lunch && m.Category == Category.Main).ToList();
+    var lunchDesserts = Model.Where(m => m.MenuType == MenuType.Lunch && m.Category == Category.Dessert).ToList();
 
-    var dinnerStarters = Model.Where(m => m.MenuType == "Dinner" && m.Category == "Starter").ToList();
-    var dinnerEntremets = Model.Where(m => m.MenuType == "Dinner" && m.Category == "Entremet").ToList();
-    var dinnerMains = Model.Where(m => m.MenuType == "Dinner" && m.Category == "Main").ToList();
-    var dinnerDesserts = Model.Where(m => m.MenuType == "Dinner" && m.Category == "Dessert").ToList();
+    var dinnerStarters = Model.Where(m => m.MenuType == MenuType.Dinner && m.Category == Category.Starter).ToList();
+    var dinnerMains = Model.Where(m => m.MenuType == MenuType.Dinner && m.Category == Category.Main).ToList();
+    var dinnerDesserts = Model.Where(m => m.MenuType == MenuType.Dinner && m.Category == Category.Dessert).ToList();
 
-    var softDrinks = Model.Where(m => m.MenuType == "Drink" && !m.IsAlcoholic).ToList();
+    var softDrinks = Model.Where(m => m.MenuType == MenuType.Drink && !m.IsAlcoholic).ToList();
     var beers = Model.Where(m => m.Name.Contains("Duvel") || m.Name.Contains("Hertog Jan") || m.Name.Contains("Kriek") || m.Name.Contains("Leffe")).ToList();
     var wines = Model.Where(m => m.Name.Contains("wine") || m.Name.Contains("Champagne")).ToList();
     var spirits = Model.Where(m => m.Name.Contains("Whisky") || m.Name.Contains("Rum") || m.Name.Contains("Vieux") || m.Name.Contains("Jenever") || m.Name.Contains("Berenburg")).ToList();
 
-    // ✅ FIXED: Coffee/Tea includes only drinks, avoids overlap with desserts like "Café surprise"
-    var coffeeTea = Model.Where(m => m.MenuType == "Drink" &&
+    var coffeeTea = Model.Where(m => m.MenuType == MenuType.Drink &&
         (m.Name.Contains("Coffee") || m.Name.Contains("Tea") || m.Name.Contains("Espresso") || m.Name.Contains("Cappuccino"))
-        && m.Category == "Drink" // Ensure only drinks (not miscategorized desserts)
+        && m.Category == Category.Drink // Ensure only drinks (not miscategorized desserts)
     ).ToList();
 }
-
+<!-- To insert it into  specific spot in the layout.  -->
 @section HeaderCart {
+    
     <div class="position-relative me-3">
         <a href="/Order/Cart" class="btn btn-outline-secondary position-relative">
             🛒 <span class="badge bg-danger position-absolute top-0 start-100 translate-middle" id="cartCount">0</span>
         </a>
     </div>
-}
+} 
 
 <div class="container mt-4">
     <h2 class="mb-4">Menu</h2>
@@ -75,13 +75,6 @@
         <h5 class="text-secondary">Starters - Entrées</h5>
         <div class="row">
             @foreach (var item in dinnerStarters)
-            {
-                @Html.Partial("_MenuItemCard", item)
-            }
-        </div>
-        <h5 class="text-secondary">Entremets</h5>
-        <div class="row">
-            @foreach (var item in dinnerEntremets)
             {
                 @Html.Partial("_MenuItemCard", item)
             }
@@ -145,17 +138,18 @@
 @section Scripts {
     <script>
         function getCart() {
-            return JSON.parse(localStorage.getItem("cart")) || [];
+            return JSON.parse(localStorage.getItem("cart")) || []; //Retrieve the cart from localStorage browser-side
         }
 
         function saveCart(cart) {
-            localStorage.setItem("cart", JSON.stringify(cart));
+            localStorage.setItem("cart", JSON.stringify(cart));//save cart to localstorage as a JSON string
         }
 
         function updateCartIcon() {
-            const cart = getCart();
-            const cartCount = document.getElementById("cartCount");
-            if (cartCount) cartCount.textContent = cart.length;
+            const cart = getCart();// retrieves the cart from localStorage
+
+            const cartCount = document.getElementById("cartCount");//grabs the HTML badge (cart icon )
+            if (cartCount) cartCount.textContent = cart.length;//Updates the badge to reflect the total number of items
         }
 
         function showToast(message) {
@@ -167,7 +161,7 @@
             }, 3000);
         }
 
-        // ✅ Updated to accept unique element IDs
+        // Updated to accept unique element IDs
                function addToCart(id, name, price, routing, maxQty, qtyInputId, noteInputId) {
             const qtyInput = document.getElementById(qtyInputId);
             const noteInput = document.getElementById(noteInputId);
@@ -179,7 +173,9 @@
 
             // Get and normalize the quantity value (handle commas)
             let rawQty = qtyInput.value.trim().replace(',', '.');
-            let qty = parseFloat(rawQty);
+                    let qty = parseFloat(rawQty);// Replaces , with . so both 1,5 and 1.5 are accepted.
+       
+                                                 //Converts it to a number with parseFloat.
 
             // Validate quantity
             if (isNaN(qty) || qty < 1) {
@@ -199,7 +195,7 @@
             const cart = JSON.parse(localStorage.getItem("cart")) || [];
 
             // Try to find existing item
-            const existingItem = cart.find(item => item.MenuItemID === id);
+            const existingItem = cart.find(item => item.MenuItemID === id);// we use this to To avoid adding the same item twice and instead just increase its quantity
 
             if (existingItem) {
                 // Update quantity (check stock limit)
@@ -229,7 +225,10 @@
             }
 
             // Save and update
-            localStorage.setItem("cart", JSON.stringify(cart));
+                    localStorage.setItem("cart", JSON.stringify(cart));
+                    /*Saves the updated cart back to the browser’s localStorage.
+
+                     Converts the cart array (a JavaScript object) into a JSON string, because localStorage only stores strings.*/
             updateCartIcon();
             showToast("✅ Order was added successfully!");
         }

@@ -6,42 +6,37 @@ using restaurant_Chapeau.Services.Interfaces;
 
 public class MenuManagementController : Controller
 {
+
     private readonly IMenuManagementService _menuService;
-
-    public IActionResult ManageMenu(string menuType, string category)
-    {   // ppass it down to the repository
-
-        //  Get all menu items from the database
-        List<MenuItem> items = _menuService.GetAllItems();
-
-        //  Filter by Menu Type if selected
-        if (!string.IsNullOrEmpty(menuType) && menuType != "All")
-        {
-            items = items.Where(item => item.MenuType == menuType).ToList();
-        }
-
-        //  Filter by Category if selected
-        if (!string.IsNullOrEmpty(category) && category != "All")
-        {
-            items = items.Where(item => item.Category == category).ToList();
-        }
-
-        //sort menu items. active comes first
-
-        items = items.OrderByDescending(item => item.IsActive).ToList();
-
-        return View(items);
-    }
-
     public MenuManagementController(IMenuManagementService menuService)
     {
         _menuService = menuService;
     }
 
+    public IActionResult ManageMenu(string menuType, string category)
+    {   
+        List<MenuItem> items = _menuService.GetAllItems();
+
+		//  Filter by Menu Type if selected
+		if (!string.IsNullOrEmpty(menuType) && menuType != "All")
+		{
+			items = items.Where(item => item.MenuType.ToString() == menuType).ToList();
+		}
+		//  Filter by Category if selected
+		if (!string.IsNullOrEmpty(category) && category != "All")
+		{
+			items = items.Where(item => item.Category.ToString() == category).ToList();
+		}
+		//sort menu items. active comes first
+
+		items = items.OrderByDescending(item => item.IsActive).ToList();
+
+        return View(items); // refreshes the view
+    }
+  
     [HttpGet]
     public IActionResult Add()
     {
-
         return View(); // Show the form
     }
 
