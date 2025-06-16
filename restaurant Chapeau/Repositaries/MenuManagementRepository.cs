@@ -6,14 +6,16 @@ using restaurant_Chapeau.Enums;
 
 namespace restaurant_Chapeau.Repositories
 {
-	public class MenuRepository : IMenuRepository
-	{
-		private readonly string _connectionString;
 
-		public MenuRepository(IConfiguration config)
-		{
-			_connectionString = config.GetConnectionString("DefaultConnection");
-		}
+    public class MenuManagementRepository : IMenuManagementRepository
+    {
+        private readonly string _connectionString;
+
+        public MenuManagementRepository(IConfiguration config)
+        {
+            _connectionString = config.GetConnectionString("DefaultConnection");
+        }
+
 
 		public List<MenuItem> GetAllItems()
 		{

@@ -18,7 +18,7 @@ namespace restaurant_Chapeau.Services
 
         public async Task<bool> ValidateCredentialsAsync(string username, string password)
         {
-            // Delegates to repository — role can be null
+            
             return await _authRepository.ValidateUserAsync(username, password);
         }
 

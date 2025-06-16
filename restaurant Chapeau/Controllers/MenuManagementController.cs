@@ -4,13 +4,10 @@ using restaurant_Chapeau.Repositaries;
 using restaurant_Chapeau.Services;
 using restaurant_Chapeau.Services.Interfaces;
 
-public class MenuController : Controller
+public class MenuManagementController : Controller
 {
-    private readonly IMenuService _menuService;
-	public MenuController(IMenuService menuService)
-	{
-		_menuService = menuService;
-	}
+
+    private readonly IMenuManagementService _menuService;
 
 	public IActionResult ManageMenu(string menuType, string category)
     {   
@@ -36,7 +33,11 @@ public class MenuController : Controller
         return View(items); //Items are returned to same view. it refreshes
     }
 
- 
+
+    public MenuManagementController(IMenuManagementService menuService)
+    {
+        _menuService = menuService;
+    }
 
     [HttpGet]
     public IActionResult Add()

@@ -51,17 +51,16 @@
                            @if (userId != null && !hideNav && (role == "Manager" || role == "Waiter"))
 
                             {
+                             
                                 <li class="nav-item me-3">
                                     <a class="nav-link fw-semibold" asp-controller="Order" asp-action="Menu">Menu</a>
                                 </li>
                             }
                             @if (role == "Manager")
                             {
+                               
                                 <li class="nav-item me-3">
-                                    <a class="nav-link fw-semibold" asp-controller="Order" asp-action="Menu">Menu</a>
-                                </li>
-                                <li class="nav-item me-3">
-                                    <a class="nav-link fw-semibold" asp-controller="Menu" asp-action="ManageMenu">Manage Menu</a>
+                                    <a class="nav-link fw-semibold" asp-controller="MenuManagement" asp-action="ManageMenu">Manage Menu</a>
                                 </li>
                                 <li class="nav-item me-3">
                                     <a class="nav-link fw-semibold" asp-controller="User" asp-action="ManageEmployees">Manage Users</a>

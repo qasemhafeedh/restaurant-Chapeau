@@ -6,11 +6,11 @@ using System.Collections.Generic;
 
 namespace restaurant_Chapeau.Services
 {
-    public class MenuService : IMenuService
+    public class MenuManagementService : IMenuManagementService
     {
-        private readonly IMenuRepository _repo;
+        private readonly IMenuManagementRepository _repo;
 
-        public MenuService(IMenuRepository repo)
+        public MenuManagementService(IMenuManagementRepository repo)
         {
             _repo = repo;
         }
