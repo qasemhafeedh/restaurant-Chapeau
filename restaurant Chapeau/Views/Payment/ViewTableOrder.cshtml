@@ -1,0 +1,41 @@
+﻿@model restaurant_Chapeau.Models.TableOrderView
+
+<div class="container mt-4">
+    <h2>Order for Table @Model.TableNumber</h2>
+
+    @if (Model.Items.Any())
+    {
+        <table class="table table-bordered mt-3">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>VAT (%)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td>@item.ItemName</td>
+                        <td>@item.Quantity</td>
+                        <td>€ @item.TotalPrice.ToString("0.00")</td>
+                        <td>@item.VATRate %</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <p><strong>Total VAT (Low 9%):</strong> € @Model.TotalLowVAT.ToString("0.00")</p>
+        <p><strong>Total VAT (High 21%):</strong> € @Model.TotalHighVAT.ToString("0.00")</p>
+        <h4>Total: € @Model.TotalAmount.ToString("0.00")</h4>
+
+        <a asp-action="FinishOrder" asp-route-tableId="@Model.TableID" class="btn btn-success">Finish Order</a>
+        <a asp-action="SplitPayment" asp-route-tableId="@Model.TableID" class="btn btn-warning">Split Payment</a>
+    }
+    else
+    {
+        <div class="alert alert-warning">No items found for this table.</div>
+    }
+</div>

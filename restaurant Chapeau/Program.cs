@@ -5,6 +5,9 @@ using restaurant_Chapeau.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Read connection string from configuration
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
 builder.Services.AddControllersWithViews();
 
 // Session
@@ -37,6 +40,11 @@ builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 // ✅ Auth dependencies
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+
+// ✅ Register PaymentRepository with connection string
+builder.Services.AddScoped<IPaymentRepository>(provider =>
+    new PaymentRepository(connectionString));
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 var app = builder.Build();
 

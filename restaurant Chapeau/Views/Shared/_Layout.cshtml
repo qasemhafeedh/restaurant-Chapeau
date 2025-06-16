@@ -48,17 +48,17 @@
                     <!-- Navigation -->
                     <div class="collapse navbar-collapse justify-content-between" id="navbarSupportedContent">
                         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                           @if (userId != null && !hideNav && (role == "Manager" || role == "Waiter"))
+                            @if (userId != null && !hideNav && (role == "Manager" || role == "Waiter"))
 
                             {
-                             
+
                                 <li class="nav-item me-3">
                                     <a class="nav-link fw-semibold" asp-controller="Order" asp-action="Menu">Menu</a>
                                 </li>
                             }
                             @if (role == "Manager")
                             {
-                               
+
                                 <li class="nav-item me-3">
                                     <a class="nav-link fw-semibold" asp-controller="MenuManagement" asp-action="ManageMenu">Manage Menu</a>
                                 </li>
@@ -87,6 +87,13 @@
                                     <a class="nav-link fw-semibold" asp-controller="KitchenBar" asp-action="BarFinishedOrders">Finished Orders</a>
                                 </li>
                             }
+                            @if (role == "Cashier")
+                            {
+                                <li class="nav-item me-3">
+                                    <a class="nav-link fw-semibold" asp-controller="Payment" asp-action="Index">Payment Dashboard</a>
+                                </li>
+                            }
+
                         </ul>
 
                         <!-- Logout -->

@@ -1,0 +1,36 @@
+﻿@model restaurant_Chapeau.Models.FinishOrderViewModel
+
+<div class="container mt-4">
+    <h2>Finish Order - Table @Model.TableID</h2>
+
+    <form method="post">
+        <input type="hidden" asp-for="OrderID" />
+        <input type="hidden" asp-for="VATAmount" />
+
+        <div class="mb-3">
+            <label>Total Amount (€)</label>
+            <input asp-for="TotalAmount" class="form-control" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label>Tip Amount (€)</label>
+            <input asp-for="TipAmount" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label>Payment Method</label>
+            <select asp-for="PaymentMethod" class="form-control">
+                <option>Cash</option>
+                <option>Debit Card</option>
+                <option>Credit Card</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label>Guest Feedback</label>
+            <textarea asp-for="Feedback" class="form-control"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Confirm Payment</button>
+    </form>
+</div>

@@ -1,0 +1,49 @@
+﻿@{
+    ViewData["Title"] = "No Order Found";
+}
+
+<style>
+    .empty-container {
+        max-width: 700px;
+        margin: 5rem auto;
+        padding: 2rem 2.5rem;
+        background-color: #fff3cd;
+        border: 2px solid #ffeeba;
+        border-radius: 1rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        color: #856404;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+        .empty-container h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .empty-container p {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .empty-container a {
+            font-weight: 600;
+            text-decoration: none;
+            color: #fff;
+            background-color: #007bff;
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.5rem;
+        }
+
+            .empty-container a:hover {
+                background-color: #0056b3;
+            }
+</style>
+
+<div class="empty-container">
+    <h1>🚫 No Order Found for This Table</h1>
+    <p>Kindly make sure guests have placed an order before proceeding to payment.</p>
+
+    <a asp-controller="Order" asp-action="Menu">🍽️ Go to Menu</a>
+</div>

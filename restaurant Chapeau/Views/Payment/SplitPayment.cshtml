@@ -1,0 +1,38 @@
+﻿@model restaurant_Chapeau.Models.SplitPaymentViewModel
+
+<div class="container mt-4">
+    <h2>Split Payment - Table @Model.TableID</h2>
+
+    <form method="post">
+        <input type="hidden" asp-for="OrderID" />
+        <input type="hidden" asp-for="TableID" />
+        <input type="hidden" asp-for="TotalAmount" />
+
+        <div class="row">
+            @for (int i = 0; i < Model.Payments.Count; i++)
+            {
+                <div class="col-md-6 mb-4">
+                    <h5>Guest @(i + 1)</h5>
+                    <div class="mb-2">
+                        <label>Amount Paid (€)</label>
+                        <input asp-for="Payments[@i].AmountPaid" class="form-control" />
+                    </div>
+                    <div class="mb-2">
+                        <label>Payment Method</label>
+                        <select asp-for="Payments[@i].PaymentMethod" class="form-control">
+                            <option>Cash</option>
+                            <option>Debit Card</option>
+                            <option>Credit Card</option>
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label>Feedback</label>
+                        <textarea asp-for="Payments[@i].Feedback" class="form-control"></textarea>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <button type="submit" class="btn btn-primary">Confirm Payment</button>
+    </form>
+</div>
