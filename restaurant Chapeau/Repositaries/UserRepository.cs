@@ -81,7 +81,7 @@ namespace restaurant_Chapeau.Repositories
             var cmd = new SqlCommand("INSERT INTO Users (Username, PasswordHash, Role, FullName, IsActive) VALUES (@u, @p, @r, @f, 1)", conn);
             cmd.Parameters.AddWithValue("@u", user.Username);
             cmd.Parameters.AddWithValue("@p", user.PasswordHash);
-            cmd.Parameters.AddWithValue("@r", user.Role);
+            cmd.Parameters.AddWithValue("@r", user.Role.ToString());
             cmd.Parameters.AddWithValue("@f", user.FullName);
 
             cmd.ExecuteNonQuery();
@@ -95,7 +95,7 @@ namespace restaurant_Chapeau.Repositories
             var cmd = new SqlCommand("UPDATE Users SET Username = @u, PasswordHash = @p, Role = @r, FullName = @f WHERE UserID = @id", conn);
             cmd.Parameters.AddWithValue("@u", user.Username);
             cmd.Parameters.AddWithValue("@p", user.PasswordHash);
-            cmd.Parameters.AddWithValue("@r", user.Role).ToString();
+            cmd.Parameters.AddWithValue("@r", user.Role.ToString());
             cmd.Parameters.AddWithValue("@f", user.FullName);
             cmd.Parameters.AddWithValue("@id", user.UserID);
 
