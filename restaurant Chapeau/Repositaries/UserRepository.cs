@@ -1,4 +1,5 @@
 ﻿using global::restaurant_Chapeau.Models;
+using restaurant_Chapeau.Enums;
 using restaurant_Chapeau.Models;
 using restaurant_Chapeau.Repositaries;
 using System.Collections.Generic;
@@ -35,7 +36,7 @@ namespace restaurant_Chapeau.Repositories
                         UserID = (int)reader["UserID"],
                         Username = reader["Username"].ToString(),
                         PasswordHash = reader["PasswordHash"].ToString(),
-                        Role = reader["Role"].ToString(),
+                        Role = Enum.Parse<Role>(reader["Role"].ToString()),
                         FullName = reader["FullName"].ToString(),
                         IsActive = reader["IsActive"] != DBNull.Value && (bool)reader["IsActive"]
                     };
@@ -63,7 +64,7 @@ namespace restaurant_Chapeau.Repositories
                     UserID = (int)reader["UserID"],
                     Username = reader["Username"].ToString(),
                     PasswordHash = reader["PasswordHash"].ToString(),
-                    Role = reader["Role"].ToString(),
+                    Role = Enum.Parse<Role>(reader["Role"].ToString()),
                     FullName = reader["FullName"].ToString(),
                     IsActive = (bool)reader["IsActive"]
                 };
@@ -94,7 +95,7 @@ namespace restaurant_Chapeau.Repositories
             var cmd = new SqlCommand("UPDATE Users SET Username = @u, PasswordHash = @p, Role = @r, FullName = @f WHERE UserID = @id", conn);
             cmd.Parameters.AddWithValue("@u", user.Username);
             cmd.Parameters.AddWithValue("@p", user.PasswordHash);
-            cmd.Parameters.AddWithValue("@r", user.Role);
+            cmd.Parameters.AddWithValue("@r", user.Role).ToString();
             cmd.Parameters.AddWithValue("@f", user.FullName);
             cmd.Parameters.AddWithValue("@id", user.UserID);
 

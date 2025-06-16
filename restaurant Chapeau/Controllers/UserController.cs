@@ -14,20 +14,20 @@ namespace restaurant_Chapeau.Controllers
 			_userService = userService;
 		}
 
-		// 1️⃣ Show all employees (renamed from Index)
+		// Show all employees 
 		public IActionResult ManageEmployees()
 		{
 			List<User> users = _userService.GetAllUsers();
-			return View("ManageEmployees", users); // This points to Views/User/ManageEmployees.cshtml
+			return View("ManageEmployees", users); 
 		}
 
-		// 2️⃣ Show the Add form
+		// Show the Add form
 		public IActionResult Add()
 		{
 			return View("AddEmployee");
 		}
 
-		// 3️⃣ Handle form submit (add)
+		//  Handle form submit (add)
 		[HttpPost]
 		public IActionResult Add(User user)
 		{
@@ -35,14 +35,14 @@ namespace restaurant_Chapeau.Controllers
 			return RedirectToAction("ManageEmployees");
 		}
 
-		// 4️⃣ Show Edit form
+		// 4 Show Edit form
 		public IActionResult Edit(int id)
 		{
 			User user = _userService.GetUserById(id);
 			return View(user);
 		}
 
-		// 5️⃣ Save edit form
+		//  Save edit form
 		[HttpPost]
 		public IActionResult Edit(User user)
 		{
@@ -50,7 +50,7 @@ namespace restaurant_Chapeau.Controllers
 			return RedirectToAction("ManageEmployees");
 		}
 
-		// 6️⃣ Activate or deactivate
+		// Activate or deactivate
 		public IActionResult ToggleActive(int id)
 		{
 			_userService.ToggleActive(id);

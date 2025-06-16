@@ -4,13 +4,11 @@ using System.Collections.Generic;
 namespace restaurant_Chapeau.Services.Interfaces
 {
     public interface IMenuService
-    { 
-        //ADD
+    {
+        //add
         List<MenuItem> GetAllItems();
         void AddItem(MenuItem item);
-   
-
-        //EDIT
+       
         MenuItem GetItemById(int id);
         void UpdateItem(MenuItem item);
 

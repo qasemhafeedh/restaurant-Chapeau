@@ -1,4 +1,5 @@
 ﻿using System.Data.SqlClient;
+using restaurant_Chapeau.Enums;
 using restaurant_Chapeau.Models;
 
 namespace restaurant_Chapeau.Repositories
@@ -44,8 +45,9 @@ namespace restaurant_Chapeau.Repositories
                 {
                     UserID = (int)reader["UserID"],
                     Username = reader["Username"].ToString(),
-                    PasswordHash = reader["PasswordHash"].ToString(),
-                    Role = reader["Role"].ToString()
+
+                    Role = Enum.Parse<Role>(reader["Role"].ToString())
+
                 };
             }
 
