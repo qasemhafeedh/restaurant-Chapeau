@@ -7,15 +7,27 @@
 
     <form method="get" class="row g-3 mb-4">
         <div class="col-md-3">
+            <label>Period</label>
+            <select name="period" class="form-select">
+                <option value="">-- Custom Range --</option>
+                <option value="month">Last Month</option>
+                <option value="quarter">Last Quarter</option>
+                <option value="year">Last Year</option>
+            </select>
+        </div>
+
+        <div class="col-md-3">
             <label>Start Date</label>
             <input type="date" name="start" class="form-control" />
         </div>
+
         <div class="col-md-3">
             <label>End Date</label>
             <input type="date" name="end" class="form-control" />
         </div>
+
         <div class="col-md-2 d-flex align-items-end">
-            <button type="submit" class="btn btn-primary">Show</button>
+            <button type="submit" class="btn btn-primary w-100">Show</button>
         </div>
     </form>
 

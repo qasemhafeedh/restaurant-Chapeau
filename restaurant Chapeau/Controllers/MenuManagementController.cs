@@ -8,41 +8,35 @@ public class MenuManagementController : Controller
 {
 
     private readonly IMenuManagementService _menuService;
+    public MenuManagementController(IMenuManagementService menuService)
+    {
+        _menuService = menuService;
+    }
 
-	public IActionResult ManageMenu(string menuType, string category)
+    public IActionResult ManageMenu(string menuType, string category)
     {   
-        //Get all menu items from the db
         List<MenuItem> items = _menuService.GetAllItems();
 
 		//  Filter by Menu Type if selected
 		if (!string.IsNullOrEmpty(menuType) && menuType != "All")
 		{
 			items = items.Where(item => item.MenuType.ToString() == menuType).ToList();
-		}//converted to string
-
+		}
 		//  Filter by Category if selected
 		if (!string.IsNullOrEmpty(category) && category != "All")
 		{
 			items = items.Where(item => item.Category.ToString() == category).ToList();
 		}
-
 		//sort menu items. active comes first
 
 		items = items.OrderByDescending(item => item.IsActive).ToList();
 
-        return View(items); //Items are returned to same view. it refreshes
+        return View(items); // refreshes the view
     }
-
-
-    public MenuManagementController(IMenuManagementService menuService)
-    {
-        _menuService = menuService;
-    }
-
+  
     [HttpGet]
     public IActionResult Add()
     {
-
         return View(); // Show the form
     }
 
