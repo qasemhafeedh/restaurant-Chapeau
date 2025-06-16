@@ -1,83 +1,86 @@
 ﻿using System.Data.SqlClient;
+using restaurant_Chapeau.Enums;
 using restaurant_Chapeau.Models;
 
 namespace restaurant_Chapeau.Repositories
 {
-    public class StockRepository : IStockRepository
-    {
-        private readonly string _connectionString;
+	public class StockRepository : IStockRepository
+	{
+		private readonly string _connectionString;
 
-        public StockRepository(IConfiguration config)
-        {
-            _connectionString = config.GetConnectionString("DefaultConnection");
-        }
+		public StockRepository(IConfiguration config)
+		{
+			_connectionString = config.GetConnectionString("DefaultConnection");
+		}
 
-        public List<MenuItem> GetAllItems()
-        {
-            var items = new List<MenuItem>();
+		public List<MenuItem> GetAllItems()
+		{
+			var items = new List<MenuItem>();
 
-            using SqlConnection conn = new(_connectionString);
-            conn.Open();
+			using SqlConnection conn = new(_connectionString);
+			conn.Open();
 
-            var cmd = new SqlCommand("SELECT * FROM MenuItems", conn);
-            using var reader = cmd.ExecuteReader();
+			var cmd = new SqlCommand("SELECT * FROM MenuItems", conn);
+			using var reader = cmd.ExecuteReader();
 
-            while (reader.Read())
-            {
-                items.Add(new MenuItem
-                {
-                    MenuItemID = (int)reader["MenuItemID"],
-                    Name = reader["Name"].ToString(),
-                    Category = reader["Category"].ToString(),
-                    Price = (decimal)reader["Price"],
-                    IsAlcoholic = (bool)reader["IsAlcoholic"],
-                    VATRate = (decimal)reader["VATRate"],
-                    QuantityAvailable = (int)reader["QuantityAvailable"],
-                    MenuType = reader["MenuType"].ToString(),
-                    RoutingTarget = reader["RoutingTarget"].ToString()
-                });
-            } // mapping in one single method
+			while (reader.Read())
+			{
+				items.Add(new MenuItem
+				{
+					MenuItemID = (int)reader["MenuItemID"],
+					Name = reader["Name"].ToString(),
+					Category = Enum.Parse<Category>(reader["Category"].ToString()),
+					Price = (decimal)reader["Price"],
+					IsAlcoholic = (bool)reader["IsAlcoholic"],
+					VATRate = (decimal)reader["VATRate"],
+					QuantityAvailable = (int)reader["QuantityAvailable"],
+					MenuType = Enum.Parse<MenuType>(reader["MenuType"].ToString()),
 
-            return items;
-        }
+					RoutingTarget = Enum.Parse<RoutingTarget>(reader["RoutingTarget"].ToString()),
+				});
+			} // mapping in one single method
 
-        public MenuItem GetItemById(int id)
-        {
-            using SqlConnection conn = new(_connectionString);
-            conn.Open();
+			return items;
+		}
 
-            var cmd = new SqlCommand("SELECT * FROM MenuItems WHERE MenuItemID = @id", conn);
-            cmd.Parameters.AddWithValue("@id", id);
+		public MenuItem GetItemById(int id)
+		{
+			using SqlConnection conn = new(_connectionString);
+			conn.Open();
 
-            using var reader = cmd.ExecuteReader();
-            if (reader.Read())
-            {
-                return new MenuItem
-                {
-                    MenuItemID = (int)reader["MenuItemID"],
-                    Name = reader["Name"].ToString(),
-                    Category = reader["Category"].ToString(),
-                    Price = (decimal)reader["Price"],
-                    IsAlcoholic = (bool)reader["IsAlcoholic"],
-                    VATRate = (decimal)reader["VATRate"],
-                    QuantityAvailable = (int)reader["QuantityAvailable"],
-                    MenuType = reader["MenuType"].ToString(),
-                    RoutingTarget = reader["RoutingTarget"].ToString()
-                };
-            }
-            return null;
-        }
+			var cmd = new SqlCommand("SELECT * FROM MenuItems WHERE MenuItemID = @id", conn);
+			cmd.Parameters.AddWithValue("@id", id);
 
-        public void UpdateItem(MenuItem item)
-        {
-            using SqlConnection conn = new(_connectionString);
-            conn.Open();
+			using var reader = cmd.ExecuteReader();
+			if (reader.Read())
+			{
+				return new MenuItem
+				{
+					MenuItemID = (int)reader["MenuItemID"],
+					Name = reader["Name"].ToString(),
+					Category = Enum.Parse<Category>(reader["Category"].ToString()),
+					Price = (decimal)reader["Price"],
+					IsAlcoholic = (bool)reader["IsAlcoholic"],
+					VATRate = (decimal)reader["VATRate"],
+					QuantityAvailable = (int)reader["QuantityAvailable"],
+					MenuType = Enum.Parse<MenuType>(reader["MenuType"].ToString()),
 
-            var cmd = new SqlCommand("UPDATE MenuItems SET QuantityAvailable = @quantity WHERE MenuItemID = @id", conn);
-            cmd.Parameters.AddWithValue("@quantity", item.QuantityAvailable);
-            cmd.Parameters.AddWithValue("@id", item.MenuItemID);
+					RoutingTarget = Enum.Parse<RoutingTarget>(reader["RoutingTarget"].ToString()),
+				};
+			}
+			return null;
+		}
 
-            cmd.ExecuteNonQuery();
-        }
-    }
+		public void UpdateItem(MenuItem item)
+		{
+			using SqlConnection conn = new(_connectionString);
+			conn.Open();
+
+			var cmd = new SqlCommand("UPDATE MenuItems SET QuantityAvailable = @quantity WHERE MenuItemID = @id", conn);
+			cmd.Parameters.AddWithValue("@quantity", item.QuantityAvailable);
+			cmd.Parameters.AddWithValue("@id", item.MenuItemID);
+
+			cmd.ExecuteNonQuery();
+		}
+	}
 }
