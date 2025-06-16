@@ -25,7 +25,7 @@ namespace restaurant_Chapeau.Controllers
             catch (Exception ex)
             {
                 TempData["OrderStatus"] = $"Error loading menu: {ex.Message}";
-                return RedirectToAction("Cart");
+                return View(new List<MenuItem>());
             }
         }
 
