@@ -1,4 +1,5 @@
 ﻿using System.Data.SqlClient;
+using restaurant_Chapeau.Enums;
 using restaurant_Chapeau.Models;
 using restaurant_Chapeau.Repositaries;
 
@@ -31,14 +32,14 @@ namespace restaurant_Chapeau.Repositories
                 {
                     MenuItemID = (int)reader["MenuItemID"],
                     Name = reader["Name"].ToString(),
-                    Category = reader["Category"].ToString(),
-                    Price = (decimal)reader["Price"],
+					Category = Enum.Parse<Category>(reader["Category"].ToString()),
+					Price = (decimal)reader["Price"],
                     IsAlcoholic = (bool)reader["IsAlcoholic"],
                     VATRate = (decimal)reader["VATRate"],
                     QuantityAvailable = (int)reader["QuantityAvailable"],
-                    MenuType = reader["MenuType"].ToString(),
-                    RoutingTarget = reader["RoutingTarget"].ToString()
-                });
+					MenuType = Enum.Parse<MenuType>(reader["MenuType"].ToString()),
+					RoutingTarget = Enum.Parse<RoutingTarget>(reader["RoutingTarget"].ToString()),
+				});
             }
 
             return list;

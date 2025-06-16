@@ -4,27 +4,26 @@
  @using restaurant_Chapeau.Models
 
 
+@using restaurant_Chapeau.Enums
 @{
     ViewData["Title"] = "Menu";
 
-    var lunchStarters = Model.Where(m => m.MenuType == "Lunch" && m.Category == "Starter").ToList();
-    var lunchMains = Model.Where(m => m.MenuType == "Lunch" && m.Category == "Main").ToList();
-    var lunchDesserts = Model.Where(m => m.MenuType == "Lunch" && m.Category == "Dessert").ToList();
+    var lunchStarters = Model.Where(m => m.MenuType == MenuType.Lunch && m.Category == Category.Starter).ToList();
+    var lunchMains = Model.Where(m => m.MenuType == MenuType.Lunch && m.Category == Category.Main).ToList();
+    var lunchDesserts = Model.Where(m => m.MenuType == MenuType.Lunch && m.Category == Category.Dessert).ToList();
 
-    var dinnerStarters = Model.Where(m => m.MenuType == "Dinner" && m.Category == "Starter").ToList();
-    var dinnerEntremets = Model.Where(m => m.MenuType == "Dinner" && m.Category == "Entremet").ToList();
-    var dinnerMains = Model.Where(m => m.MenuType == "Dinner" && m.Category == "Main").ToList();
-    var dinnerDesserts = Model.Where(m => m.MenuType == "Dinner" && m.Category == "Dessert").ToList();
+    var dinnerStarters = Model.Where(m => m.MenuType == MenuType.Dinner && m.Category == Category.Starter).ToList();
+    var dinnerMains = Model.Where(m => m.MenuType == MenuType.Dinner && m.Category == Category.Main).ToList();
+    var dinnerDesserts = Model.Where(m => m.MenuType == MenuType.Dinner && m.Category == Category.Dessert).ToList();
 
-    var softDrinks = Model.Where(m => m.MenuType == "Drink" && !m.IsAlcoholic).ToList();
+    var softDrinks = Model.Where(m => m.MenuType == MenuType.Drink && !m.IsAlcoholic).ToList();
     var beers = Model.Where(m => m.Name.Contains("Duvel") || m.Name.Contains("Hertog Jan") || m.Name.Contains("Kriek") || m.Name.Contains("Leffe")).ToList();
     var wines = Model.Where(m => m.Name.Contains("wine") || m.Name.Contains("Champagne")).ToList();
     var spirits = Model.Where(m => m.Name.Contains("Whisky") || m.Name.Contains("Rum") || m.Name.Contains("Vieux") || m.Name.Contains("Jenever") || m.Name.Contains("Berenburg")).ToList();
 
-    // ✅ FIXED: Coffee/Tea includes only drinks, avoids overlap with desserts like "Café surprise"
-    var coffeeTea = Model.Where(m => m.MenuType == "Drink" &&
+    var coffeeTea = Model.Where(m => m.MenuType == MenuType.Drink &&
         (m.Name.Contains("Coffee") || m.Name.Contains("Tea") || m.Name.Contains("Espresso") || m.Name.Contains("Cappuccino"))
-        && m.Category == "Drink" // Ensure only drinks (not miscategorized desserts)
+        && m.Category == Category.Drink // Ensure only drinks (not miscategorized desserts)
     ).ToList();
 }
 <!-- To insert it into  specific spot in the layout.  -->
@@ -76,13 +75,6 @@
         <h5 class="text-secondary">Starters - Entrées</h5>
         <div class="row">
             @foreach (var item in dinnerStarters)
-            {
-                @Html.Partial("_MenuItemCard", item)
-            }
-        </div>
-        <h5 class="text-secondary">Entremets</h5>
-        <div class="row">
-            @foreach (var item in dinnerEntremets)
             {
                 @Html.Partial("_MenuItemCard", item)
             }

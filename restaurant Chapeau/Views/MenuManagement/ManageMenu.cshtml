@@ -6,8 +6,8 @@
     <!-- Add New Item Button -->
     <a asp-controller="MenuManagement" asp-action="Add" class="btn btn-success mb-3">Add New Menu Item</a>
 
-    <!-- Filtering items -->
-    <form method="get" class="row g-3 mb-3">
+	<!-- Filtering items  -->
+	<form method="get" class="row g-3 mb-3">
         <div class="col-md-3">
             <label>Filter by Menu Type</label>
             <select name="menuType" class="form-select">
@@ -46,7 +46,7 @@
                 <th>Action</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody> <!-- loop info insterter in table for each item-->
             @foreach (var item in Model)
             {
                 string rowClass = item.QuantityAvailable <= 10 ? "table-danger" : "";

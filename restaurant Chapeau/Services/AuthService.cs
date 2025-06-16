@@ -1,4 +1,7 @@
-﻿using restaurant_Chapeau.Models;
+
+using System.Data.SqlClient;
+using restaurant_Chapeau.Enums;
+using restaurant_Chapeau.Models;
 using restaurant_Chapeau.Services.Interfaces;
 using restaurant_Chapeau.Repositories;
 
@@ -21,7 +24,9 @@ namespace restaurant_Chapeau.Services
 
         public async Task<User?> GetUserByUsernameAsync(string username)
         {
+
             return await _authRepository.GetUserByUsernameAsync(username);
+
         }
 
         public async Task<User?> AuthenticateAsync(string username, string password)
