@@ -1,4 +1,5 @@
 ﻿using System.Data.SqlClient;
+using System.Numerics;
 using restaurant_Chapeau.Models;
 using restaurant_Chapeau.Repositories;
 
@@ -116,12 +117,12 @@ namespace restaurant_Chapeau.Repositories
 
         public async Task CreateInvoiceAsync(Invoice invoice)
         {
+            decimal CostAmount = invoice.TotalAmount * 0.6m; 
             using var conn = new SqlConnection(_connectionString);
             await conn.OpenAsync();
 
-            var cmd = new SqlCommand(@"
-                INSERT INTO Invoices (InvoiceNumber, OrderID, UserID, TotalAmount, TipAmount, VATAmount, CreatedAt)
-                VALUES (@InvoiceNumber, @OrderID, @UserID, @TotalAmount, @TipAmount, @VATAmount, GETDATE())", conn);
+            var cmd = new SqlCommand(@"INSERT INTO Invoices (InvoiceNumber, OrderID, UserID, TotalAmount, TipAmount, VATAmount, CostAmount, CreatedAt)
+                                     VALUES (@InvoiceNumber, @OrderID, @UserID, @TotalAmount, @TipAmount, @VATAmount, @CostAmount, GETDATE())", conn);
 
             cmd.Parameters.AddWithValue("@InvoiceNumber", invoice.InvoiceNumber);
             cmd.Parameters.AddWithValue("@OrderID", invoice.OrderID);
@@ -129,7 +130,10 @@ namespace restaurant_Chapeau.Repositories
             cmd.Parameters.AddWithValue("@TotalAmount", invoice.TotalAmount);
             cmd.Parameters.AddWithValue("@TipAmount", invoice.TipAmount);
             cmd.Parameters.AddWithValue("@VATAmount", invoice.VATAmount);
+            cmd.Parameters.AddWithValue("@CostAmount", CostAmount);
+
             await cmd.ExecuteNonQueryAsync();
+
 
             // Mark the order as paid
             var updateCmd = new SqlCommand("UPDATE Orders SET IsPaid = 1 WHERE OrderID = @OrderID", conn);

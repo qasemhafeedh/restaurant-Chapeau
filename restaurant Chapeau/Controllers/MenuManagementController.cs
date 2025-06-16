@@ -37,16 +37,16 @@ public class MenuManagementController : Controller
     [HttpGet]
     public IActionResult Add()
     {
-        return View(); // Show the form
+        return View(); 
     }
 
     [HttpPost]
     public IActionResult Add(MenuItem item)
     {
-        _menuService.AddItem(item); // Save to DB
+        _menuService.AddItem(item); 
         return RedirectToAction("ManageMenu");
     }
-    // this is the Edit menu Item part
+    // Edit part
     [HttpGet]
     public IActionResult Edit(int id)
     {
