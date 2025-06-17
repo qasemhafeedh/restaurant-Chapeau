@@ -1,4 +1,5 @@
-﻿using restaurant_Chapeau.Models;
+﻿using restaurant_Chapeau.Enums;
+using restaurant_Chapeau.Models;
 using restaurant_Chapeau.Repositaries;
 using restaurant_Chapeau.Repositories;
 using restaurant_Chapeau.Services.Interfaces;
@@ -15,9 +16,10 @@ namespace restaurant_Chapeau.Services
             _repo = repo;
         }
 
-        public List<MenuItem> GetAllItems()
+        public List<MenuItem> GetAllItems(string menuType = null, string category = null)
         {
-            return _repo.GetAllItems();
+            return _repo.GetAllItems(menuType,category);
+           
         }
 
         public void AddItem(MenuItem item)

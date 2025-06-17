@@ -15,23 +15,9 @@ public class MenuManagementController : Controller
 
     public IActionResult ManageMenu(string menuType, string category)
     {   
-        List<MenuItem> items = _menuService.GetAllItems();
+        List<MenuItem> items = _menuService.GetAllItems(menuType, category);
 
-		//  Filter by Menu Type if selected
-		if (!string.IsNullOrEmpty(menuType) && menuType != "All")
-		{
-			items = items.Where(item => item.MenuType.ToString() == menuType).ToList();
-		}
-		//  Filter by Category if selected
-		if (!string.IsNullOrEmpty(category) && category != "All")
-		{
-			items = items.Where(item => item.Category.ToString() == category).ToList();
-		}
-		//sort menu items. active comes first
-
-		items = items.OrderByDescending(item => item.IsActive).ToList();
-
-        return View(items); // refreshes the view
+        return View(items); 
     }
   
     [HttpGet]

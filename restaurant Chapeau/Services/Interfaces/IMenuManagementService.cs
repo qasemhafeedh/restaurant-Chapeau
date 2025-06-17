@@ -7,7 +7,7 @@ namespace restaurant_Chapeau.Services.Interfaces
     public interface IMenuManagementService
     { 
         //ADD
-        List<MenuItem> GetAllItems();
+        List<MenuItem> GetAllItems(string menuType, string category);
         void AddItem(MenuItem item);
        
         MenuItem GetItemById(int id);
