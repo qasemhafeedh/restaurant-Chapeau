@@ -2,6 +2,7 @@
 {
 	public enum MenuType
 	{
+		All,
 		Lunch,
 		Dinner,
 		Drink

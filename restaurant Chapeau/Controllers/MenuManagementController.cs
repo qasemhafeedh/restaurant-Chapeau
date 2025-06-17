@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using restaurant_Chapeau.Enums;
 using restaurant_Chapeau.Models;
 using restaurant_Chapeau.Repositaries;
 using restaurant_Chapeau.Services;
 using restaurant_Chapeau.Services.Interfaces;
+using System.Drawing;
 
 public class MenuManagementController : Controller
 {
@@ -14,8 +16,11 @@ public class MenuManagementController : Controller
     }
 
     public IActionResult ManageMenu(string menuType, string category)
-    {   
-        List<MenuItem> items = _menuService.GetAllItems(menuType, category);
+    {
+        Enum.TryParse(menuType, true, out MenuType MenuType);//when cant convert to enum it returns all
+        Enum.TryParse(category, true, out Category Category);
+
+        List<MenuItem> items = _menuService.GetAllItems(MenuType, Category);
 
         return View(items); 
     }

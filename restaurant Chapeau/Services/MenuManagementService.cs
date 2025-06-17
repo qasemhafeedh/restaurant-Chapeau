@@ -15,10 +15,11 @@ namespace restaurant_Chapeau.Services
         {
             _repo = repo;
         }
+       
 
-        public List<MenuItem> GetAllItems(string menuType = null, string category = null)
+        public List<MenuItem> GetAllItems(MenuType MenuType , Category Category )
         {
-            return _repo.GetAllItems(menuType,category);
+            return _repo.GetAllItems(MenuType, Category);
            
         }
 

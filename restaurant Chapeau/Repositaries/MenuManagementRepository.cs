@@ -17,7 +17,7 @@ namespace restaurant_Chapeau.Repositories
         }
 
 
-        public List<MenuItem> GetAllItems(string menuType = null, string category = null)
+        public List<MenuItem> GetAllItems(MenuType MenuType , Category Category )
         {
             var items = new List<MenuItem>();
             using SqlConnection conn = new(_connectionString);
@@ -28,19 +28,20 @@ namespace restaurant_Chapeau.Repositories
             var cmd = new SqlCommand();
             cmd.Connection = conn;
 
-            if (!string.IsNullOrEmpty(menuType) && menuType != "All")
+            // Only filter if not 'All'
+            if (MenuType != MenuType.All)
             {
                 conditions.Add("MenuType = @menuType");
-                cmd.Parameters.AddWithValue("@menuType", menuType);
+                cmd.Parameters.AddWithValue("@menuType", MenuType.ToString());
             }
 
-            if (!string.IsNullOrEmpty(category) && category != "All")
+            if (Category != Category.All)
             {
                 conditions.Add("Category = @category");
-                cmd.Parameters.AddWithValue("@category", category);
+                cmd.Parameters.AddWithValue("@category", Category.ToString());
             }
 
-            // Add WHERE clause only if there's at least one condition
+            // Add WHERE clause if needed
             if (conditions.Count > 0)
             {
                 query += " WHERE " + string.Join(" AND ", conditions);
