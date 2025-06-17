@@ -36,11 +36,11 @@ namespace restaurant_Chapeau.Controllers
             {
                 var model = new OrderSubmission
                 {
-                    CartItems = HttpContext.Session.GetObjectFromJson<List<CartItem>>("Cart") ?? new(),
+                    CartItems = HttpContext.Session.GetObjectFromJson<List<CartItem>>("Cart") ?? new(),// using extension meth
                     Tables = await _orderService.GetTablesAsync()
                 };
 
-                ViewBag.Tables = model.Tables;
+                ViewBag.Tables = model.Tables; // to  make table list accessable to V
                 return View(model);
             }
             catch (Exception ex)

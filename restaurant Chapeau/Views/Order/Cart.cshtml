@@ -77,12 +77,12 @@
 @section Scripts {
     <script>
         const cart = JSON.parse(localStorage.getItem("cart")) || [];
-        const cartContainer = document.getElementById("cartContainer");
+        const cartContainer = document.getElementById("cartContainer");//These are references 
         const cartItemsForm = document.getElementById("cartItemsForm");
         const orderForm = document.getElementById("orderForm");
         const cartTotal = document.getElementById("cartTotal");
 
-        function renderCart() {
+        function renderCart() { // dis ite ca
             cartContainer.innerHTML = "";
             cartItemsForm.innerHTML = "";
             let total = 0;
@@ -125,7 +125,7 @@
             cartTotal.textContent = total.toFixed(2);
         }
 
-        function updateQuantity(index, value) {
+        function updateQuantity(index, value) {//cah qu
             cart[index].Quantity = parseInt(value);
             saveCart();
             renderCart();
@@ -141,16 +141,18 @@
             saveCart();
             renderCart();
         }
-             function validateOrderForm() {
+                    function validateOrderForm() {
             const selectedTable = document.getElementById("SelectedTableID").value;
+            console.log("Selected TableID:", selectedTable); //  Debug line
             if (!selectedTable) {
                 alert("⚠️ Please select a table before submitting the order.");
-                return false; // Prevent form submission
+                return false;
             }
 
-            clearCart(); // Only clear cart if valid
+            clearCart();
             return true;
         }
+
 
         function saveCart() {
             localStorage.setItem("cart", JSON.stringify(cart));
@@ -187,7 +189,7 @@
         document.addEventListener("DOMContentLoaded", function () {
             renderCart();
 
-            // ✅ Show order feedback
+            //  Show order feedback
         @if (TempData["OrderStatus"] != null)
         {
             <text>alert("@TempData["OrderStatus"]");</text>

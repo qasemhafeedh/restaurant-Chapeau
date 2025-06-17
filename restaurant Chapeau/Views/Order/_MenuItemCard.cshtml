@@ -1,8 +1,8 @@
 ﻿@model restaurant_Chapeau.Models.MenuItem
-@using System.Text.Json
+@using System.Text.Json <!-- -->
 
 @{
-	var inputIdSuffix = $"{Model.MenuItemID}_{Guid.NewGuid().ToString("N").Substring(0, 6)}";
+	var inputIdSuffix = $"{Model.MenuItemID}_{Guid.NewGuid().ToString("N").Substring(0, 6)}"; <!--generate id for note and and quentity input-->
 }
 
 <div class="col-md-4">
@@ -41,7 +41,7 @@
     @Model.Price,
     @Html.Raw(JsonSerializer.Serialize(Model.RoutingTarget)),
     @Model.QuantityAvailable,
-    "qty-@inputIdSuffix",
+					"qty-@inputIdSuffix" ,
     "note-@inputIdSuffix")'
 			@(Model.QuantityAvailable == 0 ? "disabled" : "")>
 				Add to Cart

@@ -140,15 +140,15 @@ namespace restaurant_Chapeau.Repositories
         }
 
         public async Task ReserveTableAsync(int tableId)
-        {
-            using SqlConnection conn = new(_connectionString);
-            await conn.OpenAsync();
+         {
+             using SqlConnection conn = new(_connectionString);
+             await conn.OpenAsync();
 
-            var cmd = new SqlCommand("UPDATE RestaurantTables SET ReservationStart = GETDATE(), ReservationEnd = DATEADD(MINUTE, 60, GETDATE()) WHERE TableID = @id", conn);
-            cmd.Parameters.AddWithValue("@id", tableId);
+             var cmd = new SqlCommand("UPDATE RestaurantTables SET ReservationStart = GETDATE(), ReservationEnd = DATEADD(MINUTE, 60, GETDATE()) WHERE TableID = @id", conn);
+             cmd.Parameters.AddWithValue("@id", tableId);
 
-            await cmd.ExecuteNonQueryAsync();
-        }
+             await cmd.ExecuteNonQueryAsync();
+         }
 
         public async Task<bool> SubmitOrderAsync(OrderSubmission model, int userId)
         {

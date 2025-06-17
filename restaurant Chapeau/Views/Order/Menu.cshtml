@@ -138,15 +138,15 @@
 @section Scripts {
     <script>
         function getCart() {
-            return JSON.parse(localStorage.getItem("cart")) || []; //Retrieve the cart from localStorage browser-side
+            return JSON.parse(localStorage.getItem("cart")) || []; //localStorage browser-side
         }
 
         function saveCart(cart) {
-            localStorage.setItem("cart", JSON.stringify(cart));//save cart to localstorage as a JSON string
+            localStorage.setItem("cart", JSON.stringify(cart));
         }
 
         function updateCartIcon() {
-            const cart = getCart();// retrieves the cart from localStorage
+            const cart = getCart();
 
             const cartCount = document.getElementById("cartCount");//grabs the HTML badge (cart icon )
             if (cartCount) cartCount.textContent = cart.length;//Updates the badge to reflect the total number of items
@@ -195,7 +195,7 @@
             const cart = JSON.parse(localStorage.getItem("cart")) || [];
 
             // Try to find existing item
-            const existingItem = cart.find(item => item.MenuItemID === id);// we use this to To avoid adding the same item twice and instead just increase its quantity
+            const existingItem = cart.find(item => item.MenuItemID === id);// no dup
 
             if (existingItem) {
                 // Update quantity (check stock limit)
@@ -226,12 +226,12 @@
 
             // Save and update
                     localStorage.setItem("cart", JSON.stringify(cart));
-                    /*Saves the updated cart back to the browser’s localStorage.
+                    
 
                      Converts the cart array (a JavaScript object) into a JSON string, because localStorage only stores strings.*/
             updateCartIcon();
             showToast("✅ Order was added successfully!");
-        }
+                }
 
         document.addEventListener("DOMContentLoaded", updateCartIcon);
     </script>
