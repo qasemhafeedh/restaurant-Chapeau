@@ -17,36 +17,61 @@ namespace restaurant_Chapeau.Repositories
         }
 
 
-		public List<MenuItem> GetAllItems()
-		{
-			var items = new List<MenuItem>();
+        public List<MenuItem> GetAllItems(MenuType MenuType , Category Category )
+        {
+            var items = new List<MenuItem>();
+            using SqlConnection conn = new(_connectionString);
+            conn.Open();
 
-			using SqlConnection conn = new(_connectionString);
-			conn.Open();
+            string query = "SELECT * FROM MenuItems";
+            var conditions = new List<string>();
+            var cmd = new SqlCommand();
+            cmd.Connection = conn;
 
-			var cmd = new SqlCommand("SELECT * FROM MenuItems", conn);
-			using var reader = cmd.ExecuteReader();
+            // Only filter if not 'All'
+            if (MenuType != MenuType.All)
+            {
+                conditions.Add("MenuType = @menuType");
+                cmd.Parameters.AddWithValue("@menuType", MenuType.ToString());
+            }
 
-			while (reader.Read())
-			{
-				items.Add(new MenuItem
-				{
-					MenuItemID = (int)reader["MenuItemID"],
-					Name = reader["Name"].ToString(),
-					Category = Enum.Parse<Category>(reader["Category"].ToString()),
-					Price = (decimal)reader["Price"],
-					IsAlcoholic = (bool)reader["IsAlcoholic"],
-					VATRate = (decimal)reader["VATRate"],
-					QuantityAvailable = (int)reader["QuantityAvailable"],
-					MenuType = Enum.Parse<MenuType>(reader["MenuType"].ToString()),
-					RoutingTarget = Enum.Parse<RoutingTarget>(reader["RoutingTarget"].ToString()),
-					IsActive = reader["IsActive"] != DBNull.Value ? (bool)reader["IsActive"] : false//for the activeate button. .NET cannot convert NULL to bool directly.
-				});
-			}
+            if (Category != Category.All)
+            {
+                conditions.Add("Category = @category");
+                cmd.Parameters.AddWithValue("@category", Category.ToString());
+            }
 
-			return items;
-		}
-		public void AddItem(MenuItem item)
+            // Add WHERE clause if needed
+            if (conditions.Count > 0)
+            {
+                query += " WHERE " + string.Join(" AND ", conditions);
+            }
+
+            query += " ORDER BY IsActive DESC";
+            cmd.CommandText = query;
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                items.Add(new MenuItem
+                {
+                    MenuItemID = (int)reader["MenuItemID"],
+                    Name = reader["Name"].ToString(),
+                    Category = Enum.Parse<Category>(reader["Category"].ToString()),
+                    Price = (decimal)reader["Price"],
+                    IsAlcoholic = (bool)reader["IsAlcoholic"],
+                    VATRate = (decimal)reader["VATRate"],
+                    QuantityAvailable = (int)reader["QuantityAvailable"],
+                    MenuType = Enum.Parse<MenuType>(reader["MenuType"].ToString()),
+                    RoutingTarget = Enum.Parse<RoutingTarget>(reader["RoutingTarget"].ToString()),
+                    IsActive = reader["IsActive"] != DBNull.Value ? (bool)reader["IsActive"] : false
+                });
+            }
+
+            return items;
+        }
+
+        public void AddItem(MenuItem item)
 		{
 			using SqlConnection conn = new(_connectionString);
 			conn.Open();

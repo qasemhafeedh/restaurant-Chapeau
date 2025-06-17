@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using restaurant_Chapeau.Enums;
 using restaurant_Chapeau.Models;
 using restaurant_Chapeau.Repositaries;
 using restaurant_Chapeau.Services;
 using restaurant_Chapeau.Services.Interfaces;
+using System.Drawing;
 
 public class MenuManagementController : Controller
 {
@@ -14,39 +16,28 @@ public class MenuManagementController : Controller
     }
 
     public IActionResult ManageMenu(string menuType, string category)
-    {   
-        List<MenuItem> items = _menuService.GetAllItems();
+    {
+        Enum.TryParse(menuType, true, out MenuType MenuType);//when cant convert to enum it returns all
+        Enum.TryParse(category, true, out Category Category);
 
-		//  Filter by Menu Type if selected
-		if (!string.IsNullOrEmpty(menuType) && menuType != "All")
-		{
-			items = items.Where(item => item.MenuType.ToString() == menuType).ToList();
-		}
-		//  Filter by Category if selected
-		if (!string.IsNullOrEmpty(category) && category != "All")
-		{
-			items = items.Where(item => item.Category.ToString() == category).ToList();
-		}
-		//sort menu items. active comes first
+        List<MenuItem> items = _menuService.GetAllItems(MenuType, Category);
 
-		items = items.OrderByDescending(item => item.IsActive).ToList();
-
-        return View(items); // refreshes the view
+        return View(items); 
     }
   
     [HttpGet]
     public IActionResult Add()
     {
-        return View(); // Show the form
+        return View(); 
     }
 
     [HttpPost]
     public IActionResult Add(MenuItem item)
     {
-        _menuService.AddItem(item); // Save to DB
+        _menuService.AddItem(item); 
         return RedirectToAction("ManageMenu");
     }
-    // this is the Edit menu Item part
+    // Edit part
     [HttpGet]
     public IActionResult Edit(int id)
     {
