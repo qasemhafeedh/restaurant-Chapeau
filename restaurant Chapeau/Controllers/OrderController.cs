@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc;
 using restaurant_Chapeau.Helpers;
 using restaurant_Chapeau.Models;
 using restaurant_Chapeau.Services.Interfaces;
@@ -8,46 +9,39 @@ namespace restaurant_Chapeau.Controllers
     public class OrderController : Controller
     {
         private readonly IOrderService _orderService;
+        private readonly IMenuItemService _menuItemService;
+        private readonly ITableService _tableService;
 
-        public OrderController(IOrderService orderService)
+        public OrderController(
+            IOrderService orderService,
+            IMenuItemService menuItemService,
+            ITableService tableService)
         {
             _orderService = orderService;
+            _menuItemService = menuItemService;
+            _tableService = tableService;
         }
 
         [HttpGet]
-        public async Task<IActionResult> Menu()
+        public async Task<IActionResult> Index()
         {
-            try
-            {
-                var menu = await _orderService.GetMenuItemsAsync();
-                return View(menu);
-            }
-            catch (Exception ex)
-            {
-                TempData["OrderStatus"] = $"Error loading menu: {ex.Message}";
-                return View(new List<MenuItem>());
-            }
+            var menuItems = await _menuItemService.GetAllMenuItemsAsync();
+            return View(menuItems);
         }
 
         [HttpGet]
         public async Task<IActionResult> Cart()
         {
-            try
-            {
-                var model = new OrderSubmission
-                {
-                    CartItems = HttpContext.Session.GetObjectFromJson<List<CartItem>>("Cart") ?? new(),// using extension meth
-                    Tables = await _orderService.GetTablesAsync()
-                };
+            var cartItems = HttpContext.Session.GetObjectFromJson<List<CartItem>>("Cart") ?? new();
+            var availableTables = await _tableService.GetAllTablesAsync();
 
-                ViewBag.Tables = model.Tables; // to  make table list accessable to V
-                return View(model);
-            }
-            catch (Exception ex)
+            var viewModel = new OrderSubmission
             {
-                TempData["OrderStatus"] = $"Error loading cart: {ex.Message}";
-                return View(new OrderSubmission());
-            }
+                CartItems = cartItems,
+                Tables = availableTables
+            };
+
+            return View(viewModel);
         }
 
         [HttpPost]
@@ -55,32 +49,25 @@ namespace restaurant_Chapeau.Controllers
         {
             if (model.CartItems == null || !model.CartItems.Any())
             {
-                TempData["OrderStatus"] = "Cart is empty.";
-                return RedirectToAction("Cart");
+                TempData["OrderStatus"] = "❌ Cart is empty.";
+                return RedirectToAction(nameof(Cart));
             }
+
             if (model.TableID == 0)
             {
                 TempData["OrderStatus"] = "❌ You must select a table before submitting the order.";
-                return RedirectToAction("Cart");
+                return RedirectToAction(nameof(Cart));
             }
 
+            int userId = HttpContext.Session.GetInt32("UserID") ?? 1;
 
-            try
-            {
-                int userId = HttpContext.Session.GetInt32("UserID") ?? 1;
-                bool success = await _orderService.SubmitOrderAsync(model, userId);
+            bool isSubmitted = await _orderService.SubmitOrderAsync(model, userId);
 
-                TempData["OrderStatus"] = success
-                    ? "✅ Order submitted successfully!"
-                    : "❌ Table is currently reserved.";
+            TempData["OrderStatus"] = isSubmitted
+                ? "✅ Order submitted successfully!"
+                : "❌ Table is currently reserved.";
 
-                return RedirectToAction("Cart");
-            }
-            catch (Exception ex)
-            {
-                TempData["OrderStatus"] = $"❌ Error: {ex.Message}";
-                return RedirectToAction("Cart");
-            }
+            return RedirectToAction(nameof(Cart));
         }
     }
 }

@@ -138,7 +138,7 @@
 @section Scripts {
     <script>
         function getCart() {
-            return JSON.parse(localStorage.getItem("cart")) || []; //localStorage browser-side
+            return JSON.parse(localStorage.getItem("cart")) || [];
         }
 
         function saveCart(cart) {
@@ -147,9 +147,8 @@
 
         function updateCartIcon() {
             const cart = getCart();
-
-            const cartCount = document.getElementById("cartCount");//grabs the HTML badge (cart icon )
-            if (cartCount) cartCount.textContent = cart.length;//Updates the badge to reflect the total number of items
+            const cartCount = document.getElementById("cartCount");
+            if (cartCount) cartCount.textContent = cart.length;
         }
 
         function showToast(message) {
@@ -161,59 +160,43 @@
             }, 3000);
         }
 
-        // Updated to accept unique element IDs
-               function addToCart(id, name, price, routing, maxQty, qtyInputId, noteInputId) {
+        function addToCart(id, name, price, routing, maxQty, qtyInputId, noteInputId) {
             const qtyInput = document.getElementById(qtyInputId);
             const noteInput = document.getElementById(noteInputId);
 
             if (!qtyInput) {
-                alert("⚠️ Quantity input not found.");
+                alert("Quantity input not found.");
                 return;
             }
 
-            // Get and normalize the quantity value (handle commas)
             let rawQty = qtyInput.value.trim().replace(',', '.');
-                    let qty = parseFloat(rawQty);// Replaces , with . so both 1,5 and 1.5 are accepted.
-       
-                                                 //Converts it to a number with parseFloat.
+            let qty = parseFloat(rawQty);
 
-            // Validate quantity
             if (isNaN(qty) || qty < 1) {
-                alert("⚠️ Please enter a valid quantity (minimum 1).");
+                alert("Please enter a valid quantity (minimum 1).");
                 return;
             }
 
             if (qty > maxQty) {
-                alert(`⚠️ Requested quantity (${qty}) exceeds available stock (${maxQty}).`);
+                alert(`Requested quantity (${qty}) exceeds available stock (${maxQty}).`);
                 return;
             }
 
-            // Prepare note
             const note = noteInput ? noteInput.value.trim() : "";
-
-            // Load existing cart or start new
-            const cart = JSON.parse(localStorage.getItem("cart")) || [];
-
-            // Try to find existing item
-            const existingItem = cart.find(item => item.MenuItemID === id);// no dup
+            const cart = getCart();
+            const existingItem = cart.find(item => item.MenuItemID === id);
 
             if (existingItem) {
-                // Update quantity (check stock limit)
                 const newTotalQty = existingItem.Quantity + qty;
 
                 if (newTotalQty > maxQty) {
-                    alert(`⚠️ Total quantity in cart (${newTotalQty}) exceeds available stock (${maxQty}).`);
+                    alert(`Total quantity in cart (${newTotalQty}) exceeds stock (${maxQty}).`);
                     return;
                 }
 
                 existingItem.Quantity = newTotalQty;
-
-                // Update note only if provided
-                if (note) {
-                    existingItem.Note = note;
-                }
+                if (note) existingItem.Note = note;
             } else {
-                // Add new item to cart
                 cart.push({
                     MenuItemID: id,
                     Name: name,
@@ -224,15 +207,13 @@
                 });
             }
 
-            // Save and update
-                    localStorage.setItem("cart", JSON.stringify(cart));
-                    
-
-                     Converts the cart array (a JavaScript object) into a JSON string, because localStorage only stores strings.*/
+            saveCart(cart);
             updateCartIcon();
             showToast("✅ Order was added successfully!");
-                }
+        }
 
         document.addEventListener("DOMContentLoaded", updateCartIcon);
     </script>
+}
+
 }

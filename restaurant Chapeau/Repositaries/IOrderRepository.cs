@@ -2,16 +2,13 @@
 
 namespace restaurant_Chapeau.Repositaries
 {
+    // Interfaces/IOrderRepository.cs
+    using restaurant_Chapeau.Models;
+
     public interface IOrderRepository
     {
-        Task<List<MenuItem>> GetMenuItemsAsync();
-        Task<List<RestaurantTable>> GetTablesAsync();
-        Task<bool> IsTableReservedAsync(int tableId);
-        Task<bool> IsStockAvailableAsync(int menuItemId, int quantity);
-        Task DecreaseStockAsync(int menuItemId, int quantity);
-      
+        Task<int> CreateOrderAsync(OrderSubmission model, int userId);
         Task AddOrderItemsAsync(int orderId, List<CartItem> items);
-        Task ReserveTableAsync(int tableId);
-        Task<bool> SubmitOrderAsync(OrderSubmission model, int userId);
     }
+
 }
