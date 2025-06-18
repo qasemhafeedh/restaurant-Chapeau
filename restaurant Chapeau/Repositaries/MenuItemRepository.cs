@@ -82,5 +82,28 @@ namespace restaurant_Chapeau.Repositories
 
             await cmd.ExecuteNonQueryAsync();
         }
+
+        public async Task<MenuItem?> GetByIdAsync(int id)
+        {
+            using SqlConnection conn = new(_connectionString);
+            await conn.OpenAsync();
+
+            var cmd = new SqlCommand(@"
+        SELECT MenuItemID, Name, Category, Price, IsAlcoholic, VATRate, 
+               QuantityAvailable, MenuType, RoutingTarget 
+        FROM MenuItems 
+        WHERE MenuItemID = @id", conn);
+
+            cmd.Parameters.AddWithValue("@id", id);
+
+            using var reader = await cmd.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+                return MapToMenuItem(reader);
+            }
+
+            return null;
+        }
+
     }
 }

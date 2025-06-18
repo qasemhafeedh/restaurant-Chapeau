@@ -22,6 +22,12 @@ builder.Services.AddSession(options =>
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 
+builder.Services.AddScoped<ITableRepository, TableRepository>();
+builder.Services.AddScoped<ITableService, TableService>();
+
+builder.Services.AddScoped<IMenuItemRepository, MenuItemRepository>();
+builder.Services.AddScoped<IMenuItemService, MenuItemService>();
+
 builder.Services.AddScoped<IKitchenBarRepository, KitchenBarRepository>();
 builder.Services.AddScoped<IKitchenBarService, KitchenBarService>();
 

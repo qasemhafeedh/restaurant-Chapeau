@@ -7,6 +7,8 @@ namespace restaurant_Chapeau.Repositaries
         Task<List<MenuItem>> GetAllAsync();
         Task<bool> IsStockAvailableAsync(int menuItemId, int quantity);
         Task DecreaseStockAsync(int menuItemId, int quantity);
+        Task<MenuItem?> GetByIdAsync(int menuItemId);
+
     }
 }
 

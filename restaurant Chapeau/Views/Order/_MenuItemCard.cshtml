@@ -1,51 +1,47 @@
 ﻿@model restaurant_Chapeau.Models.MenuItem
-@using System.Text.Json <!-- -->
 
-@{
-	var inputIdSuffix = $"{Model.MenuItemID}_{Guid.NewGuid().ToString("N").Substring(0, 6)}"; <!--generate id for note and and quentity input-->
-}
+<form asp-action="AddToCart" method="post" class="col-md-4">
+    <div class="card mb-3 shadow-sm h-100">
+        <div class="card-body d-flex flex-column">
+            <h5 class="card-title">@Model.Name</h5>
+            <p>€@Model.Price | @Model.RoutingTarget</p>
 
-<div class="col-md-4">
-	<div class="card mb-3 shadow-sm h-100">
-		<div class="card-body d-flex flex-column">
-			<h5 class="card-title">@Model.Name</h5>
-			<p>€@Model.Price | @Model.RoutingTarget</p>
+            <p>
+                Stock:
+                <span class="fw-bold @(Model.QuantityAvailable <= 10 ? "text-danger" : "text-success")">
+                    @Model.QuantityAvailable @(Model.QuantityAvailable <= 10 ? "(Low)" : "")
+                </span>
+            </p>
 
-			<p>
-				Stock:
-				<span class="fw-bold @(Model.QuantityAvailable <= 10 ? "text-danger" : "text-success")">
-					@Model.QuantityAvailable
-					@(Model.QuantityAvailable <= 10 ? " (Low)" : "")
-				</span>
-			</p>
+            <!-- Hidden fields for menu item data -->
+            <input type="hidden" name="MenuItemID" value="@Model.MenuItemID" />
+            <input type="hidden" name="Name" value="@Model.Name" />
+            <input type="hidden" name="Price" value="@Model.Price" />
+            <input type="hidden" name="RoutingTarget" value="@Model.RoutingTarget.ToString()" />
 
-			<input type="number"
-				   id="qty-@inputIdSuffix"
-				   class="form-control mb-2"
-				   min="1"
-				   max="@Model.QuantityAvailable"
-				   placeholder="Quantity"
-			@(Model.QuantityAvailable == 0 ? "disabled" : "") />
+            <!-- Quantity input -->
+            <input type="number"
+                   name="Quantity"
+                   class="form-control mb-2"
+                   min="1"
+                   max="@Model.QuantityAvailable"
+                   placeholder="Quantity"
+                   required
+            @(Model.QuantityAvailable == 0 ? "disabled" : "") />
 
-			<input type="text"
-				   id="note-@inputIdSuffix"
-				   placeholder="Note (optional)"
-				   class="form-control mb-3"
-			@(Model.QuantityAvailable == 0 ? "disabled" : "") />
+            <!-- Optional note -->
+            <input type="text"
+                   name="Note"
+                   placeholder="Note (optional)"
+                   class="form-control mb-3"
+            @(Model.QuantityAvailable == 0 ? "disabled" : "") />
 
-			<button type="button"
-					class="btn btn-primary mt-auto w-100"
-					onclick='addToCart(
-    @Model.MenuItemID,
-    @Html.Raw(JsonSerializer.Serialize(Model.Name)),
-    @Model.Price,
-    @Html.Raw(JsonSerializer.Serialize(Model.RoutingTarget)),
-    @Model.QuantityAvailable,
-					"qty-@inputIdSuffix" ,
-    "note-@inputIdSuffix")'
-			@(Model.QuantityAvailable == 0 ? "disabled" : "")>
-				Add to Cart
-			</button>
-		</div>
-	</div>
-</div>
+            <!-- Submit -->
+            <button type="submit"
+                    class="btn btn-primary mt-auto w-100"
+            @(Model.QuantityAvailable == 0 ? "disabled" : "")>
+                Add to Cart
+            </button>
+        </div>
+    </div>
+</form>

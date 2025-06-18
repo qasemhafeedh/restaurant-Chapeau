@@ -2,7 +2,7 @@
 
 namespace restaurant_Chapeau.Repositaries
 {
-    // Interfaces/IOrderRepository.cs
+    
     using restaurant_Chapeau.Models;
 
     public interface IOrderRepository

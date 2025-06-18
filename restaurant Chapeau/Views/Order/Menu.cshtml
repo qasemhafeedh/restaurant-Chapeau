@@ -1,9 +1,4 @@
-﻿﻿     
-@model List<restaurant_Chapeau.Models.MenuItem>
-
- @using restaurant_Chapeau.Models
-
-
+﻿@model List<restaurant_Chapeau.Models.MenuItem>
 @using restaurant_Chapeau.Enums
 @{
     ViewData["Title"] = "Menu";
@@ -16,51 +11,46 @@
     var dinnerMains = Model.Where(m => m.MenuType == MenuType.Dinner && m.Category == Category.Main).ToList();
     var dinnerDesserts = Model.Where(m => m.MenuType == MenuType.Dinner && m.Category == Category.Dessert).ToList();
 
-    var softDrinks = Model.Where(m => m.MenuType == MenuType.Drink && !m.IsAlcoholic).ToList();
-    var beers = Model.Where(m => m.Name.Contains("Duvel") || m.Name.Contains("Hertog Jan") || m.Name.Contains("Kriek") || m.Name.Contains("Leffe")).ToList();
-    var wines = Model.Where(m => m.Name.Contains("wine") || m.Name.Contains("Champagne")).ToList();
-    var spirits = Model.Where(m => m.Name.Contains("Whisky") || m.Name.Contains("Rum") || m.Name.Contains("Vieux") || m.Name.Contains("Jenever") || m.Name.Contains("Berenburg")).ToList();
-
-    var coffeeTea = Model.Where(m => m.MenuType == MenuType.Drink &&
-        (m.Name.Contains("Coffee") || m.Name.Contains("Tea") || m.Name.Contains("Espresso") || m.Name.Contains("Cappuccino"))
-        && m.Category == Category.Drink // Ensure only drinks (not miscategorized desserts)
-    ).ToList();
+    var drinks = Model.Where(m => m.MenuType == MenuType.Drink).ToList();
 }
-<!-- To insert it into  specific spot in the layout.  -->
+
 @section HeaderCart {
-    
     <div class="position-relative me-3">
         <a href="/Order/Cart" class="btn btn-outline-secondary position-relative">
-            🛒 <span class="badge bg-danger position-absolute top-0 start-100 translate-middle" id="cartCount">0</span>
+            🛒 <span class="badge bg-danger position-absolute top-0 start-100 translate-middle">View</span>
         </a>
     </div>
-} 
+}
 
 <div class="container mt-4">
     <h2 class="mb-4">Menu</h2>
 
-    <div id="toast" class="alert alert-success position-fixed top-0 end-0 m-4" style="display:none; z-index:1050;">
-        ✅ Order was added successfully!
-    </div>
+    @if (TempData["OrderStatus"] != null)
+    {
+        <div class="alert alert-info">@TempData["OrderStatus"]</div>
+    }
 
-    <!-- LUNCH -->
+    <!-- SECTION: LUNCH -->
     <div class="p-3 mb-4 bg-light rounded shadow-sm">
         <h3 class="text-primary">Lunch</h3>
-        <h5 class="text-secondary">Starters - Entrées</h5>
+
+        <h5 class="text-secondary">Starters</h5>
         <div class="row">
             @foreach (var item in lunchStarters)
             {
                 @Html.Partial("_MenuItemCard", item)
             }
         </div>
-        <h5 class="text-secondary">Mains - Le plat principal</h5>
+
+        <h5 class="text-secondary">Mains</h5>
         <div class="row">
             @foreach (var item in lunchMains)
             {
                 @Html.Partial("_MenuItemCard", item)
             }
         </div>
-        <h5 class="text-secondary">Desserts - Les Desserts</h5>
+
+        <h5 class="text-secondary">Desserts</h5>
         <div class="row">
             @foreach (var item in lunchDesserts)
             {
@@ -69,24 +59,27 @@
         </div>
     </div>
 
-    <!-- DINNER -->
+    <!-- SECTION: DINNER -->
     <div class="p-3 mb-4 bg-warning-subtle rounded shadow-sm">
         <h3 class="text-dark">Dinner</h3>
-        <h5 class="text-secondary">Starters - Entrées</h5>
+
+        <h5 class="text-secondary">Starters</h5>
         <div class="row">
             @foreach (var item in dinnerStarters)
             {
                 @Html.Partial("_MenuItemCard", item)
             }
         </div>
-        <h5 class="text-secondary">Mains - Le plat principal</h5>
+
+        <h5 class="text-secondary">Mains</h5>
         <div class="row">
             @foreach (var item in dinnerMains)
             {
                 @Html.Partial("_MenuItemCard", item)
             }
         </div>
-        <h5 class="text-secondary">Desserts - Les Desserts</h5>
+
+        <h5 class="text-secondary">Desserts</h5>
         <div class="row">
             @foreach (var item in dinnerDesserts)
             {
@@ -95,125 +88,71 @@
         </div>
     </div>
 
-    <!-- DRINKS -->
+    <!-- SECTION: DRINKS -->
     <div class="p-3 mb-4 bg-info-subtle rounded shadow-sm">
-        <h3 class="text-dark">Drinks - Les Boissons</h3>
-        <h5 class="text-secondary">Soft Drinks</h5>
+        <h3 class="text-dark">Drinks</h3>
+
+        <h5 class="text-secondary mt-3">Soft Drinks</h5>
         <div class="row">
-            @foreach (var item in softDrinks)
+            @foreach (var item in drinks.Where(d =>
+            d.Name.Contains("Spa") ||
+            d.Name.Contains("Coca Cola") ||
+            d.Name.Contains("Sisi") ||
+            d.Name.Contains("Tonic") ||
+            d.Name.Contains("Bitter Lemon")))
             {
                 @Html.Partial("_MenuItemCard", item)
             }
         </div>
-        <h5 class="text-secondary">Beers on Tap</h5>
+
+        <h5 class="text-secondary mt-4">Beers on Tap</h5>
         <div class="row">
-            @foreach (var item in beers)
+            @foreach (var item in drinks.Where(d =>
+            d.Name.Contains("Hertog Jan") ||
+            d.Name.Contains("Duvel") ||
+            d.Name.Contains("Kriek") ||
+            d.Name.Contains("Leffe")))
             {
                 @Html.Partial("_MenuItemCard", item)
             }
         </div>
-        <h5 class="text-secondary">Wines</h5>
+
+        <h5 class="text-secondary mt-4">Wines</h5>
         <div class="row">
-            @foreach (var item in wines)
+            @foreach (var item in drinks.Where(d =>
+            d.Name.Contains("wine") ||
+            d.Name.Contains("Champagne") ||
+            d.Name.Contains("port", StringComparison.OrdinalIgnoreCase)))
             {
                 @Html.Partial("_MenuItemCard", item)
             }
         </div>
-        <h5 class="text-secondary">Spirits</h5>
+
+        <h5 class="text-secondary mt-4">Spirits</h5>
         <div class="row">
-            @foreach (var item in spirits)
+            @foreach (var item in drinks.Where(d =>
+            d.Name.Contains("Jenever") ||
+            d.Name.Contains("Whisky") ||
+            d.Name.Contains("Rum") ||
+            d.Name.Contains("Vieux") ||
+            d.Name.Contains("Berenburg")))
             {
                 @Html.Partial("_MenuItemCard", item)
             }
         </div>
-        <h5 class="text-secondary">Coffee / Tea</h5>
+
+        <h5 class="text-secondary mt-4">Coffee & Tea</h5>
         <div class="row">
-            @foreach (var item in coffeeTea)
+            @foreach (var item in drinks.Where(d =>
+            d.Name.Contains("Coffee") ||
+            d.Name.Contains("Espresso") ||
+            d.Name.Contains("Cappuccino") ||
+            d.Name.Contains("Tea")))
             {
                 @Html.Partial("_MenuItemCard", item)
             }
         </div>
     </div>
+
+    </div>
 </div>
-@section Scripts {
-    <script>
-        function getCart() {
-            return JSON.parse(localStorage.getItem("cart")) || [];
-        }
-
-        function saveCart(cart) {
-            localStorage.setItem("cart", JSON.stringify(cart));
-        }
-
-        function updateCartIcon() {
-            const cart = getCart();
-            const cartCount = document.getElementById("cartCount");
-            if (cartCount) cartCount.textContent = cart.length;
-        }
-
-        function showToast(message) {
-            const toast = document.getElementById("toast");
-            toast.textContent = message;
-            toast.style.display = "block";
-            setTimeout(() => {
-                toast.style.display = "none";
-            }, 3000);
-        }
-
-        function addToCart(id, name, price, routing, maxQty, qtyInputId, noteInputId) {
-            const qtyInput = document.getElementById(qtyInputId);
-            const noteInput = document.getElementById(noteInputId);
-
-            if (!qtyInput) {
-                alert("Quantity input not found.");
-                return;
-            }
-
-            let rawQty = qtyInput.value.trim().replace(',', '.');
-            let qty = parseFloat(rawQty);
-
-            if (isNaN(qty) || qty < 1) {
-                alert("Please enter a valid quantity (minimum 1).");
-                return;
-            }
-
-            if (qty > maxQty) {
-                alert(`Requested quantity (${qty}) exceeds available stock (${maxQty}).`);
-                return;
-            }
-
-            const note = noteInput ? noteInput.value.trim() : "";
-            const cart = getCart();
-            const existingItem = cart.find(item => item.MenuItemID === id);
-
-            if (existingItem) {
-                const newTotalQty = existingItem.Quantity + qty;
-
-                if (newTotalQty > maxQty) {
-                    alert(`Total quantity in cart (${newTotalQty}) exceeds stock (${maxQty}).`);
-                    return;
-                }
-
-                existingItem.Quantity = newTotalQty;
-                if (note) existingItem.Note = note;
-            } else {
-                cart.push({
-                    MenuItemID: id,
-                    Name: name,
-                    Price: price,
-                    Quantity: qty,
-                    Note: note,
-                    RoutingTarget: routing
-                });
-            }
-
-            saveCart(cart);
-            updateCartIcon();
-            showToast("✅ Order was added successfully!");
-        }
-
-        document.addEventListener("DOMContentLoaded", updateCartIcon);
-    </script>
-}
-
-}

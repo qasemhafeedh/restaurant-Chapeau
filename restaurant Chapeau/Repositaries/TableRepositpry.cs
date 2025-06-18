@@ -1,5 +1,4 @@
-﻿// Repositories/TableRepository.cs
-using System.Data.SqlClient;
+﻿using System.Data.SqlClient;
 using restaurant_Chapeau.Models;
 using restaurant_Chapeau.Repositaries;
 
@@ -20,12 +19,6 @@ namespace restaurant_Chapeau.Repositories
 
             using SqlConnection conn = new(_connectionString);
             await conn.OpenAsync();
-
-            var cleanupCmd = new SqlCommand(@"
-                UPDATE RestaurantTables 
-                SET ReservationStart = NULL, ReservationEnd = NULL 
-                WHERE ReservationEnd < GETDATE()", conn);
-            await cleanupCmd.ExecuteNonQueryAsync();
 
             var cmd = new SqlCommand("SELECT TableID, TableNumber, ReservationStart, ReservationEnd FROM RestaurantTables", conn);
             using var reader = await cmd.ExecuteReaderAsync();
@@ -73,6 +66,19 @@ namespace restaurant_Chapeau.Repositories
             await cmd.ExecuteNonQueryAsync();
         }
 
+        public async Task CleanupExpiredReservationsAsync()
+        {
+            using SqlConnection conn = new(_connectionString);
+            await conn.OpenAsync();
+
+            var cleanupCmd = new SqlCommand(@"
+                UPDATE RestaurantTables 
+                SET ReservationStart = NULL, ReservationEnd = NULL 
+                WHERE ReservationEnd < GETDATE()", conn);
+
+            await cleanupCmd.ExecuteNonQueryAsync();
+        }
+
         private RestaurantTable MapToTable(SqlDataReader reader)
         {
             return new RestaurantTable
@@ -85,4 +91,3 @@ namespace restaurant_Chapeau.Repositories
         }
     }
 }
-
