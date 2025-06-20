@@ -115,6 +115,19 @@ namespace restaurant_Chapeau.Controllers
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
+        [HttpPost]
+        public IActionResult UpdateOrderStatus(Order order, OrderStatus newStatus)
+        {
+            try
+            {
+                _orderService.UpdeteOrderStatus(order, newStatus);
+                return RedirectToAction("KitchenRunningOrders");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
 
         [HttpPost]
         public IActionResult UpdateBarOrderItemStatus(int itemId, ItemStatus newStatus, int orderId)

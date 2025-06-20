@@ -4,7 +4,8 @@
 @{
     ViewData["Title"] = "Running Orders";
 }
-<h1>Running Bar Orders</h1>
+
+<h1>Running Kitchen Orders</h1>
 <div class="orders-container">
     @foreach (var order in Model)
     {
@@ -17,35 +18,82 @@
             {
                 <p><strong>Comment:</strong> @order.Comment</p>
             }
-            @foreach (var item in order.Items.Where(i => i.target == RoutingTarget.Bar))
-            {
-                <div class="item-entry">
-                    <div class="item-info">
-                        <strong>@item.Name</strong>
-                        <span class="current-status status-tag @item.itemStatus.ToString().ToLower()">
-                            @item.itemStatus
-                        </span>
-                    </div>
+            <!---
+            <form asp-action="UpdateOrderStatus" asp-controller="KitchenBar" method="post" style="display:inline;">
+                <input type="hidden" name="orderId" value="@order.Id" />
+                <input type="hidden" name="newStatus" value="@ItemStatus.Preparing" />
+                <button type="submit" class="status-btn preparing">Start Preparing All</button>
+            </form>
+            -->
 
-                    @if (!string.IsNullOrEmpty(item.Note))
-                    {
-                        <div class="item-note">Note: @item.Note</div>
-                    }
-                    <div class="item-status-buttons">
-                        @foreach (var status in Enum.GetValues(typeof(ItemStatus)).Cast<ItemStatus>())
+            @foreach (var group in order.Items.GroupBy(i => i.courseType))
+            {
+                <div class="course-group">
+                    <h4 class="course-title">@group.Key</h4>
+
+                    <!-- Course-level status buttons -->
+                    <div class="course-status-controls">
+                        @{
+                            var allSameStatus = group.All(i => i.itemStatus == group.First().itemStatus);
+                            var currentCourseStatus = allSameStatus ? group.First().itemStatus : (ItemStatus?)null;
+                        }
+
+                        @if (currentCourseStatus != ItemStatus.Preparing && group.Any(i => i.itemStatus == ItemStatus.Pending))
                         {
-                            <form asp-action="UpdateBarOrderItemStatus" asp-controller="KitchenBar" method="post" style="display:inline;">
-                                <input type="hidden" name="itemId" value="@item.Id" />
+                            <form asp-action="UpdateCourseStatus" asp-controller="KitchenBar" method="post" style="display:inline;">
                                 <input type="hidden" name="orderId" value="@order.Id" />
-                                <input type="hidden" name="newStatus" value="@status" />
-                                <button type="submit"
-                                        class="status-btn @status.ToString().ToLower() @(item.itemStatus == status ? "current" : "")"
-                                @(item.itemStatus == status ? "disabled" : "")>
-                                    @status
-                                </button>
+                                <input type="hidden" name="courseType" value="@group.Key" />
+                                <input type="hidden" name="newStatus" value="@ItemStatus.Preparing" />
+                                <button type="submit" class="status-btn preparing">Start Preparing All</button>
+                            </form>
+                        }
+
+                        @if (currentCourseStatus != ItemStatus.Ready && group.Any(i => i.itemStatus == ItemStatus.Preparing))
+                        {
+                            <form asp-action="UpdateKitchenCourseStatus" asp-controller="KitchenBar" method="post" style="display:inline;">
+                                <input type="hidden" name="orderId" value="@order.Id" />
+                                <input type="hidden" name="courseType" value="@group.Key" />
+                                <input type="hidden" name="newStatus" value="@ItemStatus.Ready" />
+                                <button type="submit" class="status-btn ready">Mark All Ready</button>
                             </form>
                         }
                     </div>
+
+                    <!-- List items under this course -->
+                    <ul class="item-list">
+                        @foreach (var item in group)
+                        {
+                            <li class="item-entry">
+                                <div class="item-info">
+                                    <span class="item-name">@item.Name</span>
+                                    <span class="current-status status-tag @item.itemStatus.ToString().ToLower()">
+                                        @item.itemStatus
+                                    </span>
+                                </div>
+
+                                @if (!string.IsNullOrEmpty(item.Note))
+                                {
+                                    <div class="item-note">Note: @item.Note</div>
+                                }
+
+                                <div class="item-status-buttons">
+                                    @foreach (var status in Enum.GetValues(typeof(ItemStatus)).Cast<ItemStatus>())
+                                    {
+                                        <form asp-action="UpdateKitchenOrderItemStatus" asp-controller="KitchenBar" method="post" style="display:inline;">
+                                            <input type="hidden" name="itemId" value="@item.Id" />
+                                            <input type="hidden" name="orderId" value="@order.Id" />
+                                            <input type="hidden" name="newStatus" value="@status" />
+                                            <button type="submit"
+                                                    class="status-btn @status.ToString().ToLower() @(item.itemStatus == status ? "current" : "")"
+                                            @(item.itemStatus == status ? "disabled" : "")>
+                                                @status
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </li>
+                        }
+                    </ul>
                 </div>
             }
         </div>
