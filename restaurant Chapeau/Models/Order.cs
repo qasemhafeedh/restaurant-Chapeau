@@ -2,12 +2,12 @@
 {
     public class Order
     {
-        
+
         public int Id { get; set; }
         public int TableNumber { get; set; }
         public DateTime OrderTime { get; set; }
         public List<OrderItems> Items { get; set; }
-        public string comment { get; set; }
+        public string Comment { get; set; }
         public OrderStatus Status { get; set; }
 
         public class OrderItems
@@ -25,7 +25,16 @@
             Kitchen,
             Bar
         }
+        public Order(int id, int tableNumber, DateTime orderTime, List<OrderItems> items, string? comment, OrderStatus status)
+        {
+            Id = id;
+            TableNumber = tableNumber;
+            OrderTime = orderTime;
+            Items = items;
+            Comment = comment;
+            Status = status;
+        }
 
     }
-   
+
 }

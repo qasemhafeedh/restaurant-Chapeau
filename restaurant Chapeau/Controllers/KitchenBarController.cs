@@ -6,38 +6,46 @@ namespace restaurant_Chapeau.Controllers
 {
     public class KitchenBarController : Controller
     {
-        private readonly IKitchenBarService _kitchenBarService;
+        private readonly IOrderService _orderService;
 
-        public KitchenBarController(IKitchenBarService kitchenBarService)
+        public KitchenBarController(IOrderService orderService)
         {
-            _kitchenBarService = kitchenBarService;
+            _orderService = orderService;
         }
 
         public IActionResult KitchenRunningOrders()
         {
-            var runningOrders = _kitchenBarService.GetRunningOrders();
-            return View("Kitchen/RunningOrders", runningOrders);
+            var runningOrders = _orderService.GetRunningOrders();
+            var kitchenOrders = _orderService.FilterOrdersByTarget(runningOrders, Order.RoutingTarget.Kitchen);
+            return View("RunningOrders", kitchenOrders);
         }
+
         public IActionResult KitchenFinishedOrders()
         {
-            var finisedOrders = _kitchenBarService.GetFinishedOrders();
-            return View("Kitchen/FinishedOrders", finisedOrders);
+            var finishedOrders = _orderService.GetFinishedOrders();
+            var kitchenOrders = _orderService.FilterOrdersByTarget(finishedOrders, Order.RoutingTarget.Kitchen);
+            return View("FinishedOrders", kitchenOrders);
         }
-        public IActionResult BarFinishedOrders()
-        {
-            var finisedOrders = _kitchenBarService.GetFinishedOrders();
-            return View("Bar/FinishedOrders", finisedOrders);
-        }
+
         public IActionResult BarRunningOrders()
         {
-            var runningOrders = _kitchenBarService.GetRunningOrders();
-            return View("Bar/RunningOrders", runningOrders);
+            var runningOrders = _orderService.GetRunningOrders();
+            var barOrders = _orderService.FilterOrdersByTarget(runningOrders, Order.RoutingTarget.Bar);
+            return View("RunningOrders", barOrders);
         }
+
+        public IActionResult BarFinishedOrders()
+        {
+            var finishedOrders = _orderService.GetFinishedOrders();
+            var barOrders = _orderService.FilterOrdersByTarget(finishedOrders, Order.RoutingTarget.Bar);
+            return View("FinishedOrders", barOrders);
+        }
+
 
         [HttpGet]
         public IActionResult OrderDetails(int id)
         {
-            var order = _kitchenBarService.GetOrderById(id);
+            var order = _orderService.GetOrderById(id);
             if (order == null)
                 return NotFound();
 
@@ -47,28 +55,28 @@ namespace restaurant_Chapeau.Controllers
         [HttpPost]
         public IActionResult UpdateKitchenOrderItemStatus(int itemId, ItemStatus newStatus, int orderId)
         {
-            _kitchenBarService.UpdateOrderItemStatus(itemId, newStatus);
+            _orderService.UpdateOrderItemStatus(itemId, newStatus);
 
             // Redirect back to running orders instead of order details
-            return RedirectToAction("KitchenRunningOrders");
+            return RedirectToAction("RunningOrders");
         }
 
         [HttpPost]
         public IActionResult UpdateKitchenCourseStatus(int orderId, CourseType courseType, ItemStatus newStatus)
         {
-            _kitchenBarService.UpdateCourseStatus(orderId, courseType, newStatus);
+            _orderService.UpdateCourseStatus(orderId, courseType, newStatus);
 
-            return RedirectToAction("KitchenRunningOrders");
+            return RedirectToAction("RunningOrders");
         }
         [HttpPost]
         public IActionResult UpdateBarOrderItemStatus(int itemId, ItemStatus newStatus, int orderId)
         {
-            _kitchenBarService.UpdateOrderItemStatus(itemId, newStatus);
+            _orderService.UpdateOrderItemStatus(itemId, newStatus);
 
             // Redirect back to running orders instead of order details
-            return RedirectToAction("BarRunningOrders");
+            return RedirectToAction("RunningOrders");
         }
 
-       
+
     }
 }

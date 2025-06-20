@@ -2,46 +2,36 @@
 @using restaurant_Chapeau.Models
 @using static restaurant_Chapeau.Models.Order
 @{
-    ViewData["Title"] = "Finished Kitchen Orders";
+    ViewData["Title"] = "Finished Bar Orders";
 }
 
-<h1>Finished Kitchen Orders</h1>
+<h1>Finished Bar Orders</h1>
 <div class="orders-container">
-    @foreach (var order in Model.Where(o => o.Items.Any(i => i.target == RoutingTarget.Kitchen)))
+    @foreach (var order in Model)
     {
         <div class="order-card">
             <h3>Order #@order.Id</h3>
             <p><strong>Table:</strong> @order.TableNumber</p>
             <p><strong>Time:</strong> @order.OrderTime.ToString("HH:mm")</p>
             <p><strong>Status:</strong> @order.Status</p>
-            @if (!string.IsNullOrEmpty(order.comment))
+            @if (!string.IsNullOrEmpty(order.Comment))
             {
-                <p><strong>Comment:</strong> @order.comment</p>
+                <p><strong>Comment:</strong> @order.Comment</p>
             }
 
-            @foreach (var group in order.Items.Where(i => i.target == RoutingTarget.Kitchen).GroupBy(i => i.courseType))
+            @foreach (var item in order.Items.Where(i => i.target == RoutingTarget.Bar))
             {
-                <div class="course-group">
-                    <h4 class="course-title">@group.Key</h4>
-
-                    <ul class="item-list">
-                        @foreach (var item in group)
-                        {
-                            <li class="item-entry">
-                                <div class="item-info">
-                                    <span class="item-name">@item.Name</span>
-                                    <span class="status-tag @item.itemStatus.ToString().ToLower()">
-                                        @item.itemStatus
-                                    </span>
-                                </div>
-
-                                @if (!string.IsNullOrEmpty(item.Note))
-                                {
-                                    <div class="item-note">Note: @item.Note</div>
-                                }
-                            </li>
-                        }
-                    </ul>
+                <div class="item-entry">
+                    <div class="item-info">
+                        <strong>@item.Name</strong>
+                        <span class="status-tag @item.itemStatus.ToString().ToLower()">
+                            @item.itemStatus
+                        </span>
+                    </div>
+                    @if (!string.IsNullOrEmpty(item.Note))
+                    {
+                        <div class="item-note">Note: @item.Note</div>
+                    }
                 </div>
             }
         </div>
@@ -62,35 +52,14 @@
         padding: 1rem;
         margin-bottom: 1rem;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        min-width: 350px;
-        flex: 1;
+        min-width: 300px;
         opacity: 0.8;
-    }
-
-    .course-group {
-        margin-bottom: 2rem;
-        padding: 1rem;
-        background: #f9f9f9;
-        border-radius: 8px;
-    }
-
-    .course-title {
-        font-weight: bold;
-        font-size: 1.2rem;
-        margin-bottom: 0.5rem;
-        color: #555;
-    }
-
-    .item-list {
-        list-style-type: none;
-        padding-left: 0;
-        margin: 0;
     }
 
     .item-entry {
         margin-bottom: 1rem;
         padding: 0.5rem;
-        background: #fff;
+        background: #f9f9f9;
         border: 1px solid #ddd;
         border-radius: 4px;
     }
@@ -100,10 +69,6 @@
         justify-content: space-between;
         align-items: center;
         margin-bottom: 0.5rem;
-    }
-
-    .item-name {
-        font-weight: 500;
     }
 
     .status-tag {
