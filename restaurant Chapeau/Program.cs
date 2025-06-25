@@ -41,14 +41,18 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
 builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 
-// ✅ Auth dependencies
+//  Auth dependencies
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
-// ✅ Register PaymentRepository with connection string
+// Register PaymentRepository with connection string
 builder.Services.AddScoped<IPaymentRepository>(provider =>
     new PaymentRepository(connectionString));
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<ICartService, CartService>();
+
+
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 

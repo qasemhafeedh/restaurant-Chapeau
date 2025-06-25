@@ -1,64 +1,84 @@
-﻿using restaurant_Chapeau.Models;
+﻿using restaurant_Chapeau.Helpers;
+using restaurant_Chapeau.Models;
 using restaurant_Chapeau.Repositaries;
 using restaurant_Chapeau.Services.Interfaces;
+using restaurant_Chapeau.ViewModels;
 
-namespace restaurant_Chapeau.Services
+public class OrderService : IOrderService
 {
-    /// <summary>
-    /// Handles business logic related to orders.
-    /// </summary>
-    public class OrderService : IOrderService
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly ITableService _tableService;
+    private readonly IMenuItemService _menuItemService;
+    private readonly IOrderRepository _orderRepository;
+
+    public OrderService(
+        ITableService tableService,
+        IMenuItemService menuItemService,
+        IOrderRepository orderRepository,
+        IHttpContextAccessor httpContextAccessor)
     {
-        private readonly ITableService _tableService;
-        private readonly IMenuItemService _menuItemService;
-        private readonly IOrderRepository _orderRepository;
-
-        /// <summary>
-        /// Constructor that injects dependencies for table, menu item, and order services.
-        /// </summary>
-        /// <param name="tableService">Service to handle table reservation logic.</param>
-        /// <param name="menuItemService">Service to handle menu item stock and retrieval.</param>
-        /// <param name="orderRepository">Repository for order database operations.</param>
-        public OrderService(
-            ITableService tableService,
-            IMenuItemService menuItemService,
-            IOrderRepository orderRepository)
-        {
-            _tableService = tableService;
-            _menuItemService = menuItemService;
-            _orderRepository = orderRepository;
-        }
-
-        /// <summary>
-        /// Submits a new order after validating table availability and item stock.
-        /// </summary>
-        /// <param name="model">The order submission data including cart and table info.</param>
-        /// <param name="userId">The user ID submitting the order.</param>
-        /// <returns>True if order was successfully submitted, otherwise false.</returns>
-        public async Task<bool> SubmitOrderAsync(OrderSubmission model, int userId)
-        {
-            // Check if table is already reserved
-            if (await _tableService.IsReservedAsync(model.TableID))
-                return false;
-
-            // Verify stock availability and update stock
-            foreach (var item in model.CartItems)
-            {
-                var stockOk = await _menuItemService.IsStockAvailableAsync(item.MenuItemID, item.Quantity);
-                if (!stockOk)
-                    throw new Exception($"Insufficient stock for {item.Name}");
-
-                await _menuItemService.DecreaseStockAsync(item.MenuItemID, item.Quantity);
-            }
-
-            // Reserve table
-            await _tableService.ReserveAsync(model.TableID);
-
-            // Create order and add items to the database
-            int orderId = await _orderRepository.CreateOrderAsync(model, userId);
-            await _orderRepository.AddOrderItemsAsync(orderId, model.CartItems);
-
-            return true;
-        }
+        _tableService = tableService;
+        _menuItemService = menuItemService;
+        _orderRepository = orderRepository;
+        _httpContextAccessor = httpContextAccessor;
     }
+
+    
+
+    public async Task<bool> SubmitOrderAsync(OrderSubmission model, int userId)
+    {
+        if (await _tableService.IsReservedAsync(model.TableID))
+            return false;
+
+        foreach (var item in model.CartItems)
+        {
+            if (!await _menuItemService.IsStockAvailableAsync(item.MenuItemID, item.Quantity))
+                throw new Exception($"Insufficient stock for {item.Name}");
+
+            await _menuItemService.DecreaseStockAsync(item.MenuItemID, item.Quantity);
+        }
+
+       
+
+        int orderId = await _orderRepository.CreateOrderAsync(model, userId);
+        await _orderRepository.AddOrderItemsAsync(orderId, model.CartItems);
+
+        return true;
+    }
+    public async Task<SubmitOrderResult> TrySubmitOrderAsync(CartViewModel model, int userId)
+    {
+        if (model.SelectedTableID == 0)
+            return new SubmitOrderResult { StatusMessage = "⚠️ Please select a table." };
+
+        if (model.Items == null || !model.Items.Any())
+            return new SubmitOrderResult { StatusMessage = "⚠️ Cart is empty." };
+
+
+        var order = new OrderSubmission
+        {
+            TableID = model.SelectedTableID,
+            CartItems = model.Items.Select(i => new CartItem
+            {
+                MenuItemID = i.MenuItemID,
+                Name = i.Name,
+                Price = i.Price,
+                Quantity = i.Quantity,
+                Note = i.Note,
+                RoutingTarget = i.RoutingTarget.ToString()
+            }).ToList(),
+            TipAmount = model.TipAmount,
+            Comment = model.Comment
+        };
+
+        bool submitted = await SubmitOrderAsync(order, userId);
+
+        return new SubmitOrderResult
+        {
+            Success = submitted,
+            StatusMessage = submitted
+                ? "✅ Order submitted successfully!"
+                : "⚠️ Table is currently reserved."
+        };
+    }
+
 }

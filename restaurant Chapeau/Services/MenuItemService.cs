@@ -13,10 +13,7 @@ namespace restaurant_Chapeau.Services
             _menuItemRepository = menuItemRepository;
         }
 
-        /// <summary>
-        /// Fetches all menu items from the repository.
-        /// </summary>
-        /// <returns>List of menu items</returns>
+      
         public async Task<List<MenuItem>> GetAllMenuItemsAsync()
         {
             try
@@ -30,22 +27,12 @@ namespace restaurant_Chapeau.Services
             }
         }
 
-        /// <summary>
-        /// Checks if sufficient stock exists for a specific menu item.
-        /// </summary>
-        /// <param name="menuItemId">Menu item ID</param>
-        /// <param name="quantity">Requested quantity</param>
-        /// <returns>True if stock is sufficient, otherwise false</returns>
+      
         public async Task<bool> IsStockAvailableAsync(int menuItemId, int quantity)
         {
             return await _menuItemRepository.IsStockAvailableAsync(menuItemId, quantity);
         }
 
-        /// <summary>
-        /// Decreases the stock of a menu item by the specified quantity.
-        /// </summary>
-        /// <param name="menuItemId">Menu item ID</param>
-        /// <param name="quantity">Quantity to decrease</param>
         public async Task DecreaseStockAsync(int menuItemId, int quantity)
         {
             await _menuItemRepository.DecreaseStockAsync(menuItemId, quantity);
@@ -53,7 +40,7 @@ namespace restaurant_Chapeau.Services
         public async Task<MenuItem?> GetMenuItemByIdAsync(int menuItemId)
         {
             var allItems = await _menuItemRepository.GetAllAsync();
-            return allItems.FirstOrDefault(m => m.MenuItemID == menuItemId);
+            return allItems.FirstOrDefault(m => m.MenuItemID == menuItemId);// Searches the list for a match by ID.
         }
 
     }

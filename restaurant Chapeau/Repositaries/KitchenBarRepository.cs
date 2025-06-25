@@ -1,7 +1,11 @@
-﻿using System.Data.SqlClient;
+﻿using System;
+using System.Data.SqlClient;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Extensions.Configuration;
+using restaurant_Chapeau.Enums;
 using restaurant_Chapeau.Models;
 using restaurant_Chapeau.Services.Interfaces;
-using static restaurant_Chapeau.Models.Order;
 
 namespace restaurant_Chapeau.Repositaries
 {
@@ -22,7 +26,7 @@ namespace restaurant_Chapeau.Repositaries
             using (var conn = new SqlConnection(_connectionString))
             {
                 conn.Open();
-
+                //
                 string query = @"
                 SELECT o.OrderId, o.TableID, o.Comment, o.OrderTime, oi.Note,
                        mi.Name AS MenuItemName, mi.Category, oi.Status, oi.OrderItemID, mi.RoutingTarget
@@ -46,7 +50,7 @@ namespace restaurant_Chapeau.Repositaries
                             TableNumber = (int)reader["TableID"],
                             comment = reader["Comment"]?.ToString(),
                             OrderTime = (DateTime)reader["OrderTime"],
-                            Items = new List<Order.OrderItems>()
+                            Items = new List<OrderItem>()
                         };
                         orderLookup[orderId] = order;
                     }
@@ -54,20 +58,18 @@ namespace restaurant_Chapeau.Repositaries
                     var itemStatus = Enum.TryParse<ItemStatus>(reader["Status"].ToString(), out var status)
                         ? status : ItemStatus.Pending;
 
-                    order.Items.Add(new Order.OrderItems
+                    order.Items.Add(new OrderItem
                     {
                         Id = (int)reader["OrderItemID"],
                         Note = reader["Note"] == DBNull.Value ? null : reader["Note"].ToString(),
                         Name = reader["MenuItemName"].ToString(),
                         courseType = Enum.TryParse<CourseType>(reader["Category"].ToString(), out var ct) ? ct : default,
                         itemStatus = itemStatus,
-                                                target = Enum.TryParse<RoutingTarget>(reader["RoutingTarget"].ToString(), out var target) ? target : default
-
+                        target = Enum.TryParse<RoutingTarget>(reader["RoutingTarget"].ToString(), out var target) ? target : default
                     });
                 }
             }
 
-            // Filter for running orders (at least one item is not Ready)
             foreach (var order in orderLookup.Values)
             {
                 if (order.Items.Any(item => item.itemStatus != ItemStatus.Ready))
@@ -112,7 +114,7 @@ namespace restaurant_Chapeau.Repositaries
                             TableNumber = (int)reader["TableID"],
                             comment = reader["Comment"]?.ToString(),
                             OrderTime = (DateTime)reader["OrderTime"],
-                            Items = new List<Order.OrderItems>()
+                            Items = new List<OrderItem>()
                         };
                         orderLookup[orderId] = order;
                     }
@@ -120,10 +122,10 @@ namespace restaurant_Chapeau.Repositaries
                     var itemStatus = Enum.TryParse<ItemStatus>(reader["Status"].ToString(), out var status)
                         ? status : ItemStatus.Pending;
 
-                    order.Items.Add(new Order.OrderItems
+                    order.Items.Add(new OrderItem
                     {
                         Id = (int)reader["OrderItemID"],
-                        Note = reader["Note"]?.ToString(),
+                        Note = reader["Note"] == DBNull.Value ? null : reader["Note"].ToString(),
                         Name = reader["MenuItemName"].ToString(),
                         courseType = Enum.TryParse<CourseType>(reader["Category"].ToString(), out var ct) ? ct : default,
                         itemStatus = itemStatus
@@ -131,7 +133,6 @@ namespace restaurant_Chapeau.Repositaries
                 }
             }
 
-            // Filter orders: only include if all items are Ready
             foreach (var order in orderLookup.Values)
             {
                 if (order.Items.All(item => item.itemStatus == ItemStatus.Ready))
@@ -155,7 +156,6 @@ namespace restaurant_Chapeau.Repositaries
                 string query = @"
                 SELECT o.OrderId, o.TableID, o.Comment, o.OrderTime, oi.Note,
                        mi.Name AS MenuItemName, mi.Category, oi.Status, oi.OrderItemID, mi.RoutingTarget
-
                 FROM Orders o
                 JOIN OrderItems oi ON o.OrderId = oi.OrderId
                 JOIN MenuItems mi ON oi.MenuItemId = mi.MenuItemId
@@ -178,7 +178,7 @@ namespace restaurant_Chapeau.Repositaries
                             TableNumber = (int)reader["TableID"],
                             comment = reader["Comment"]?.ToString(),
                             OrderTime = (DateTime)reader["OrderTime"],
-                            Items = new List<Order.OrderItems>()
+                            Items = new List<OrderItem>()
                         };
                         orderLookup[currentOrderId] = order;
                     }
@@ -186,7 +186,7 @@ namespace restaurant_Chapeau.Repositaries
                     var itemStatus = Enum.TryParse<ItemStatus>(reader["Status"].ToString(), out var status)
                         ? status : ItemStatus.Pending;
 
-                    order.Items.Add(new Order.OrderItems
+                    order.Items.Add(new OrderItem
                     {
                         Id = (int)reader["OrderItemID"],
                         Note = reader["Note"] == DBNull.Value ? null : reader["Note"].ToString(),
@@ -206,14 +206,11 @@ namespace restaurant_Chapeau.Repositaries
             using var conn = new SqlConnection(_connectionString);
             conn.Open();
 
-            // Fixed: Use ItemStatus instead of OrderStatus
             var cmd = new SqlCommand("UPDATE OrderItems SET Status = @status WHERE OrderItemId = @itemId", conn);
             cmd.Parameters.AddWithValue("@status", newStatus.ToString());
             cmd.Parameters.AddWithValue("@itemId", orderItemId);
 
             cmd.ExecuteNonQuery();
         }
-
-       
     }
 }

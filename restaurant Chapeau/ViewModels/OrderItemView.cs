@@ -1,4 +1,4 @@
-﻿namespace restaurant_Chapeau.Models
+﻿namespace restaurant_Chapeau.ViewModels
 {
     public class OrderItemView
     {
@@ -7,5 +7,4 @@
         public decimal TotalPrice { get; set; }
         public decimal VATRate { get; set; }
     }
-
 }

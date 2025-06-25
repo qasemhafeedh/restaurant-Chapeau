@@ -16,7 +16,7 @@ namespace restaurant_Chapeau.Repositories
 
         public async Task<List<MenuItem>> GetAllAsync()
         {
-            var menuItems = new List<MenuItem>();
+            List<MenuItem> menuItems = new List<MenuItem>();
             using SqlConnection conn = new(_connectionString);
             await conn.OpenAsync();
 

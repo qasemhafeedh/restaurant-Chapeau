@@ -35,70 +35,50 @@
                 <tbody>
                     @for (int i = 0; i < Model.Items.Count; i++)
                     {
-                        var item = Model.Items[i];
                         <tr>
-                            <td>@item.Name</td>
-                            <td>€@item.Price.ToString("0.00")</td>
+                            <td>@Model.Items[i].Name</td>
+                            <td>€@Model.Items[i].Price.ToString("0.00")</td>
                             <td>
-                                <input type="number"
-                                       name="Items[@i].Quantity"
-                                       value="@item.Quantity"
-                                       class="form-control"
-                                       min="1"
-                                       required />
-
-                                <input type="hidden" name="Items[@i].MenuItemID" value="@item.MenuItemID" />
-                                <input type="hidden" name="Items[@i].Name" value="@item.Name" />
-                                <input type="hidden" name="Items[@i].Price" value="@item.Price" />
-                                <input type="hidden" name="Items[@i].RoutingTarget" value="@item.RoutingTarget" />
+                                <input asp-for="Items[@i].Quantity" class="form-control" min="1" type="number" required />
+                                <input asp-for="Items[@i].MenuItemID" type="hidden" />
+                                <input asp-for="Items[@i].Name" type="hidden" />
+                                <input asp-for="Items[@i].Price" type="hidden" />
+                                <input asp-for="Items[@i].RoutingTarget" type="hidden" />
                             </td>
                             <td>
-                                <input type="text"
-                                       name="Items[@i].Note"
-                                       value="@item.Note"
-                                       class="form-control"
-                                       placeholder="Optional note..." />
+                                <input asp-for="Items[@i].Note" class="form-control" placeholder="Optional note..." />
                             </td>
                             <td>
-                                <!-- SEPARATE form: does NOT depend on table -->
-                            <td>
-                                <a asp-action="RemoveCartItem"
-                                   asp-route-id="@item.MenuItemID"
-                                   class="btn btn-sm btn-danger">
-                                    ✖
-                                </a>
-                            </td>
-
+                                <a asp-action="RemoveCartItem" asp-route-id="@Model.Items[i].MenuItemID" class="btn btn-sm btn-danger">✖</a>
                             </td>
                         </tr>
                     }
-
                 </tbody>
             </table>
 
             <div class="mb-3">
-                <label class="form-label fw-bold">Select a Table</label>
-                <select name="SelectedTableID" class="form-select" required>
+                <label asp-for="SelectedTableID" class="form-label fw-bold">Select a Table</label>
+                <select asp-for="SelectedTableID" class="form-select" required>
                     <option value="">-- Choose Table --</option>
                     @foreach (var table in Model.Tables)
                     {
                         var isReserved = table.ReservationStart <= DateTime.Now && table.ReservationEnd >= DateTime.Now;
                         if (!isReserved)
                         {
-                            <option value="@table.TableID">Table @table.TableNumber</option>
+                            <option value="@table.TableID">@($"Table {table.TableNumber}")</option>
                         }
                     }
                 </select>
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Comment</label>
-                <textarea name="Comment" class="form-control" rows="2">@Model.Comment</textarea>
+                <label asp-for="Comment" class="form-label">Comment</label>
+                <textarea asp-for="Comment" class="form-control" rows="2"></textarea>
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Tip (€)</label>
-                <input type="number" name="TipAmount" class="form-control" step="0.01" min="0" value="@Model.TipAmount.ToString("0.00")" />
+                <label asp-for="TipAmount" class="form-label">Tip (€)</label>
+                <input asp-for="TipAmount" class="form-control" step="0.01" min="0" />
             </div>
 
             <div class="mb-3">

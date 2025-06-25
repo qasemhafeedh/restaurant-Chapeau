@@ -1,4 +1,5 @@
-﻿namespace restaurant_Chapeau.Models
+﻿using restaurant_Chapeau.ViewModels;
+namespace restaurant_Chapeau.Models
 {
     public class TableOrderView
     {

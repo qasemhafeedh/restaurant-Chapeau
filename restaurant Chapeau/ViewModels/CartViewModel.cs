@@ -11,7 +11,7 @@ namespace restaurant_Chapeau.ViewModels
 
         public decimal Total => Items.Sum(item => item.Price * item.Quantity);
 
-        // ✅ Add this to support tables in the view
+        // Add this to support tables in the view
         public List<RestaurantTable> Tables { get; set; } = new();
     }
 }

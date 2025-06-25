@@ -50,34 +50,7 @@ namespace restaurant_Chapeau.Repositories
             return false;
         }
 
-        public async Task ReserveAsync(int tableId)
-        {
-            using SqlConnection conn = new(_connectionString);
-            await conn.OpenAsync();
-
-            var cmd = new SqlCommand(@"
-                UPDATE RestaurantTables 
-                SET ReservationStart = GETDATE(), 
-                    ReservationEnd = DATEADD(MINUTE, 60, GETDATE()) 
-                WHERE TableID = @id", conn);
-
-            cmd.Parameters.AddWithValue("@id", tableId);
-
-            await cmd.ExecuteNonQueryAsync();
-        }
-
-        public async Task CleanupExpiredReservationsAsync()
-        {
-            using SqlConnection conn = new(_connectionString);
-            await conn.OpenAsync();
-
-            var cleanupCmd = new SqlCommand(@"
-                UPDATE RestaurantTables 
-                SET ReservationStart = NULL, ReservationEnd = NULL 
-                WHERE ReservationEnd < GETDATE()", conn);
-
-            await cleanupCmd.ExecuteNonQueryAsync();
-        }
+      
 
         private RestaurantTable MapToTable(SqlDataReader reader)
         {

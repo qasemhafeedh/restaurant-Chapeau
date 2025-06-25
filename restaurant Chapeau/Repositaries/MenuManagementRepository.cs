@@ -64,7 +64,7 @@ namespace restaurant_Chapeau.Repositories
                     QuantityAvailable = (int)reader["QuantityAvailable"],
                     MenuType = Enum.Parse<MenuType>(reader["MenuType"].ToString()),
                     RoutingTarget = Enum.Parse<RoutingTarget>(reader["RoutingTarget"].ToString()),
-                    IsActive = reader["IsActive"] != DBNull.Value ? (bool)reader["IsActive"] : false
+                   IsActive = reader["IsActive"] != DBNull.Value ? (bool)reader["IsActive"] : false
                 });
             }
 
