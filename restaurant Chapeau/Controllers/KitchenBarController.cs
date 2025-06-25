@@ -7,19 +7,19 @@ namespace restaurant_Chapeau.Controllers
 {
     public class KitchenBarController : Controller
     {
-        private readonly IOrderService _orderService;
+        private readonly IKitchenBarService _kitchenBarService;
 
-        public KitchenBarController(IOrderService orderService)
+        public KitchenBarController(IKitchenBarService kitchenBarService)
         {
-            _orderService = orderService;
+            _kitchenBarService = kitchenBarService;
         }
 
         public IActionResult KitchenRunningOrders()
         {
             try
             {
-                var runningOrders = _orderService.GetRunningOrders();
-                var kitchenOrders = _orderService.FilterOrdersByTarget(runningOrders, Order.RoutingTarget.Kitchen);
+                var runningOrders = _kitchenBarService.GetRunningOrders();
+                var kitchenOrders = _kitchenBarService.FilterOrdersByTarget(runningOrders, Order.RoutingTarget.Kitchen);
                 return View("RunningOrders", kitchenOrders);
             }
             catch (Exception ex)
@@ -33,8 +33,8 @@ namespace restaurant_Chapeau.Controllers
         {
             try
             {
-                var finishedOrders = _orderService.GetFinishedOrders();
-                var kitchenOrders = _orderService.FilterOrdersByTarget(finishedOrders, Order.RoutingTarget.Kitchen);
+                var finishedOrders = _kitchenBarService.GetFinishedOrders();
+                var kitchenOrders = _kitchenBarService.FilterOrdersByTarget(finishedOrders, Order.RoutingTarget.Kitchen);
                 return View("FinishedOrders", kitchenOrders);
             }
             catch (Exception ex)
@@ -47,8 +47,8 @@ namespace restaurant_Chapeau.Controllers
         {
             try
             {
-                var runningOrders = _orderService.GetRunningOrders();
-                var barOrders = _orderService.FilterOrdersByTarget(runningOrders, Order.RoutingTarget.Bar);
+                var runningOrders = _kitchenBarService.GetRunningOrders();
+                var barOrders = _kitchenBarService.FilterOrdersByTarget(runningOrders, Order.RoutingTarget.Bar);
                 return View("RunningOrders", barOrders);
             }
             catch (Exception ex)
@@ -61,8 +61,8 @@ namespace restaurant_Chapeau.Controllers
         {
             try
             {
-                var finishedOrders = _orderService.GetFinishedOrders();
-                var barOrders = _orderService.FilterOrdersByTarget(finishedOrders, Order.RoutingTarget.Bar);
+                var finishedOrders = _kitchenBarService.GetFinishedOrders();
+                var barOrders = _kitchenBarService.FilterOrdersByTarget(finishedOrders, Order.RoutingTarget.Bar);
                 return View("FinishedOrders", barOrders);
             }
             catch (Exception ex)
@@ -76,7 +76,7 @@ namespace restaurant_Chapeau.Controllers
         {
             try
             {
-                var order = _orderService.GetOrderById(id);
+                var order = _kitchenBarService.GetOrderById(id);
                 if (order == null)
                     return NotFound();
 
@@ -93,7 +93,7 @@ namespace restaurant_Chapeau.Controllers
         {
             try
             {
-                _orderService.UpdateOrderItemStatus(itemId, newStatus);
+                _kitchenBarService.UpdateOrderItemStatus(itemId, newStatus);
                 return RedirectToAction("KitchenRunningOrders");
             }
             catch (Exception ex)
@@ -107,7 +107,7 @@ namespace restaurant_Chapeau.Controllers
         {
             try
             {
-                _orderService.UpdateCourseStatus(orderId, courseType, newStatus);
+                _kitchenBarService.UpdateCourseStatus(orderId, courseType, newStatus);
                 return RedirectToAction("KitchenRunningOrders");
             }
             catch (Exception ex)
@@ -120,7 +120,7 @@ namespace restaurant_Chapeau.Controllers
         {
             try
             {
-                _orderService.UpdeteOrderStatus(order, newStatus);
+                _kitchenBarService.UpdeteOrderStatus(order, newStatus);
                 return RedirectToAction("KitchenRunningOrders");
             }
             catch (Exception ex)
@@ -134,7 +134,7 @@ namespace restaurant_Chapeau.Controllers
         {
             try
             {
-                _orderService.UpdateOrderItemStatus(itemId, newStatus);
+                _kitchenBarService.UpdateOrderItemStatus(itemId, newStatus);
                 return RedirectToAction("BarRunningOrders");
             }
             catch (Exception ex)

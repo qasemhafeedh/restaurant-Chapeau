@@ -55,8 +55,8 @@ namespace restaurant_Chapeau.Repositories
             
 
         }
-        ////////
-        ///
+        /////////////////////////////////////////////////////////(below this is for the bar and Kitcehn )//////////////////////////
+        
         private Order ReadOrder(SqlDataReader reader)
         {
             int orderId = (int)reader["OrderId"];
