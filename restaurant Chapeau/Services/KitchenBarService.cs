@@ -32,16 +32,8 @@ namespace restaurant_Chapeau.Services
 
         public List<Order> GetRunningOrders()
         {
-            try
-            {
-                List<Order> runningOrders = _orderRepository.GetAllOrders();
-                return runningOrders.Where(o => o.Status == OrderStatus.Running).ToList();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting running orders");
-                throw;
-            }
+            List<Order> runningOrders = _orderRepository.GetAllOrders();
+            return runningOrders.Where(o => o.Status == OrderStatus.Running).ToList();
         }
 
         public List<Order> GetFinishedOrders()
