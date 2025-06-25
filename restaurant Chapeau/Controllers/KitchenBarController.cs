@@ -1,65 +1,134 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using restaurant_Chapeau.Models;
 using restaurant_Chapeau.Services.Interfaces;
+using System;
 
 namespace restaurant_Chapeau.Controllers
 {
     public class KitchenBarController : Controller
     {
-        private readonly IKitchenBarService _kitchenBarService;
+        private readonly IOrderService _orderService;
 
-        public KitchenBarController(IKitchenBarService kitchenBarService)
+        public KitchenBarController(IOrderService orderService)
         {
-            _kitchenBarService = kitchenBarService;
+            _orderService = orderService;
         }
 
         public IActionResult KitchenRunningOrders()
         {
-            var runningOrders = _kitchenBarService.GetRunningOrders();
-            return View("Kitchen/RunningOrders", runningOrders);
+            try
+            {
+                var runningOrders = _orderService.GetRunningOrders();
+                var kitchenOrders = _orderService.FilterOrdersByTarget(runningOrders, Order.RoutingTarget.Kitchen);
+                return View("RunningOrders", kitchenOrders);
+            }
+            catch (Exception ex)
+            {
+                // Log exception here
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
+
         public IActionResult KitchenFinishedOrders()
         {
-            var finisedOrders = _kitchenBarService.GetFinishedOrders();
-            return View("Kitchen/FinishedOrders", finisedOrders);
+            try
+            {
+                var finishedOrders = _orderService.GetFinishedOrders();
+                var kitchenOrders = _orderService.FilterOrdersByTarget(finishedOrders, Order.RoutingTarget.Kitchen);
+                return View("FinishedOrders", kitchenOrders);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
-        public IActionResult BarFinishedOrders()
-        {
-            var finisedOrders = _kitchenBarService.GetFinishedOrders();
-            return View("Bar/FinishedOrders", finisedOrders);
-        }
+
         public IActionResult BarRunningOrders()
         {
-            var runningOrders = _kitchenBarService.GetRunningOrders();
-            return View("Bar/RunningOrders", runningOrders);
+            try
+            {
+                var runningOrders = _orderService.GetRunningOrders();
+                var barOrders = _orderService.FilterOrdersByTarget(runningOrders, Order.RoutingTarget.Bar);
+                return View("RunningOrders", barOrders);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
+        public IActionResult BarFinishedOrders()
+        {
+            try
+            {
+                var finishedOrders = _orderService.GetFinishedOrders();
+                var barOrders = _orderService.FilterOrdersByTarget(finishedOrders, Order.RoutingTarget.Bar);
+                return View("FinishedOrders", barOrders);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
 
         [HttpGet]
         public IActionResult OrderDetails(int id)
         {
-            var order = _kitchenBarService.GetOrderById(id);
-            if (order == null)
-                return NotFound();
+            try
+            {
+                var order = _orderService.GetOrderById(id);
+                if (order == null)
+                    return NotFound();
 
-            return View(order);
+                return View(order);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
 
         [HttpPost]
         public IActionResult UpdateKitchenOrderItemStatus(int itemId, ItemStatus newStatus, int orderId)
         {
-            _kitchenBarService.UpdateOrderItemStatus(itemId, newStatus);
-
-            // Redirect back to running orders instead of order details
-            return RedirectToAction("KitchenRunningOrders");
+            try
+            {
+                _orderService.UpdateOrderItemStatus(itemId, newStatus);
+                return RedirectToAction("KitchenRunningOrders");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
 
         [HttpPost]
         public IActionResult UpdateKitchenCourseStatus(int orderId, CourseType courseType, ItemStatus newStatus)
         {
-            _kitchenBarService.UpdateCourseStatus(orderId, courseType, newStatus);
-
-            return RedirectToAction("KitchenRunningOrders");
+            try
+            {
+                _orderService.UpdateCourseStatus(orderId, courseType, newStatus);
+                return RedirectToAction("KitchenRunningOrders");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
+        [HttpPost]
+        public IActionResult UpdateOrderStatus(Order order, OrderStatus newStatus)
+        {
+            try
+            {
+                _orderService.UpdeteOrderStatus(order, newStatus);
+                return RedirectToAction("KitchenRunningOrders");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
         [HttpPost]
         public IActionResult UpdateBarOrderItemStatus(int itemId, ItemStatus newStatus, int orderId)
         {

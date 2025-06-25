@@ -3,24 +3,25 @@
 @using restaurant_Chapeau.Enums
 @using static restaurant_Chapeau.Models.Order
 @{
-    ViewData["Title"] = "Finished Kitchen Orders";
+    ViewData["Title"] = "Finished  Orders";
 }
 
 <h1>Finished Kitchen Orders</h1>
 <div class="orders-container">
-    @foreach (var order in Model.Where(o => o.Items.Any(i => i.target == RoutingTarget.Kitchen)))
+    @foreach (var order in Model)
     {
         <div class="order-card">
             <h3>Order #@order.Id</h3>
             <p><strong>Table:</strong> @order.TableNumber</p>
             <p><strong>Time:</strong> @order.OrderTime.ToString("HH:mm")</p>
             <p><strong>Status:</strong> @order.Status</p>
-            @if (!string.IsNullOrEmpty(order.comment))
+            @if (!string.IsNullOrEmpty(order.Comment))
             {
-                <p><strong>Comment:</strong> @order.comment</p>
+                <p><strong>Comment:</strong> @order.Comment</p>
             }
+           
 
-            @foreach (var group in order.Items.Where(i => i.target == RoutingTarget.Kitchen).GroupBy(i => i.courseType))
+            @foreach (var group in order.Items.GroupBy(i => i.courseType))
             {
                 <div class="course-group">
                     <h4 class="course-title">@group.Key</h4>
