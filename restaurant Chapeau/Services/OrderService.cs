@@ -48,14 +48,13 @@ public class OrderService : IOrderService
     }
     public async Task<SubmitOrderResult> ProcessOrderSubmissionAsync(CartViewModel model, int userId)
     {
-        if (model.SelectedTableID == 0)
+        if (model.SelectedTableID == 0) 
             return new SubmitOrderResult { StatusMessage = "⚠️ Please select a table." };
 
-        if (model.Items == null || !model.Items.Any())
+        if (model.Items == null || !model.Items.Any()) 
             return new SubmitOrderResult { StatusMessage = "⚠️ Cart is empty." };
 
-
-        var order = new OrderSubmission
+        OrderSubmission order = new OrderSubmission
         {
             TableID = model.SelectedTableID,
             CartItems = model.Items.Select(i => new CartItem

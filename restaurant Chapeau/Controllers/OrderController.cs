@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 
 namespace restaurant_Chapeau.Controllers
-{
+{                                                                                   ///// ⚠️ ✅//// Icon to use for the viewData and tempData
     public class OrderController : Controller
     {
         private readonly ICartService _cartService;
@@ -47,7 +47,7 @@ namespace restaurant_Chapeau.Controllers
         [HttpPost]
         public async Task<IActionResult> AddToCart(AddToCartViewModel model)
         {
-            var result = await _cartService.AddToCartAsync(model);
+            AddToCartResult result = await _cartService.AddToCartAsync(model);
 
             TempData["OrderStatus"] = result.StatusMessage;
             return RedirectToAction("Menu");
@@ -60,8 +60,8 @@ namespace restaurant_Chapeau.Controllers
         {
             try
             {
-                var tables = await _tableService.GetAllTablesAsync();
-                var viewModel = _cartService.BuildCartViewModel(tables);
+                List<RestaurantTable> tables = await _tableService.GetAllTablesAsync();
+                CartViewModel viewModel = _cartService.BuildCartViewModel(tables);
                 return View(viewModel);
             }
             catch (Exception ex)
@@ -93,7 +93,7 @@ namespace restaurant_Chapeau.Controllers
         {
             try
             {
-                var result = await _orderService.ProcessOrderSubmissionAsync(model, GetUserId());
+                SubmitOrderResult result = await _orderService.ProcessOrderSubmissionAsync(model, GetUserId());
 
                 TempData["OrderStatus"] = result.StatusMessage;
 
