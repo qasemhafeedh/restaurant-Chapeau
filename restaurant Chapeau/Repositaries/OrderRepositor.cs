@@ -34,7 +34,7 @@ namespace restaurant_Chapeau.Repositories
             return (int)await cmd.ExecuteScalarAsync();
         }
 
-        public async Task AddOrderItemsAsync(int orderId, List<CartItem> items)
+       public async Task AddOrderItemsAsync(int orderId, List<CartItem> items)
         {
             using SqlConnection conn = new(_connectionString);
             await conn.OpenAsync();

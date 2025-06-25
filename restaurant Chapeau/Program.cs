@@ -21,9 +21,12 @@ builder.Services.AddSession(options =>
 // Repositories and Services
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IKitchenBarService, KitchenBarService>();
+
 
 builder.Services.AddScoped<ITableRepository, TableRepository>();
 builder.Services.AddScoped<ITableService, TableService>();
+builder.Services.AddScoped<ICartService, CartService>();
 
 builder.Services.AddScoped<IMenuItemRepository, MenuItemRepository>();
 builder.Services.AddScoped<IMenuItemService, MenuItemService>();
@@ -41,6 +44,10 @@ builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 // ✅ Auth dependencies
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+
+
+builder.Services.AddHttpContextAccessor(); // ✅ Fixes your error
+
 
 // ✅ Register PaymentRepository with connection string
 builder.Services.AddScoped<IPaymentRepository>(provider =>

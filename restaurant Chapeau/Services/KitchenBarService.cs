@@ -16,7 +16,7 @@ namespace restaurant_Chapeau.Services
 
         public List<Order> GetRunningOrders()
         {
-            List<Order> runningOrders = _orderRepository.GetAllOrders();
+            var runningOrders = _orderRepository.GetAllOrders();
             return runningOrders.Where(o => o.Status == OrderStatus.Running).ToList();
         }
 
