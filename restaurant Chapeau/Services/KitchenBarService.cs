@@ -7,72 +7,128 @@ namespace restaurant_Chapeau.Services
     public class KitchenBarService : IKitchenBarService
     {
         private readonly IOrderRepository _orderRepository;
-        private readonly ILogger<OrderService> _logger;
+        private readonly ILogger<KitchenBarService> _logger; // Fixed logger type
+
+        // ✅ ADD THIS CONSTRUCTOR
+        public KitchenBarService(IOrderRepository orderRepository, ILogger<KitchenBarService> logger)
+        {
+            _orderRepository = orderRepository ?? throw new ArgumentNullException(nameof(orderRepository));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
+
         public Order GetOrderById(int orderId)
         {
-            List<Order> allOrders = _orderRepository.GetAllOrders();
-            return allOrders.FirstOrDefault(o => o.Id == orderId);
+            try
+            {
+                List<Order> allOrders = _orderRepository.GetAllOrders();
+                return allOrders.FirstOrDefault(o => o.Id == orderId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting order by ID: {OrderId}", orderId);
+                throw;
+            }
         }
 
         public List<Order> GetRunningOrders()
         {
-            List<Order> runningOrders = _orderRepository.GetAllOrders();
-            return runningOrders.Where(o => o.Status == OrderStatus.Running).ToList();
+            try
+            {
+                List<Order> runningOrders = _orderRepository.GetAllOrders();
+                return runningOrders.Where(o => o.Status == OrderStatus.Running).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting running orders");
+                throw;
+            }
         }
 
         public List<Order> GetFinishedOrders()
         {
-            List<Order> finishedOrders = _orderRepository.GetAllOrders();
-            return finishedOrders.Where(o => o.Status == OrderStatus.Finished).ToList();
+            try
+            {
+                List<Order> finishedOrders = _orderRepository.GetAllOrders();
+                var today = DateTime.Today;
+                return finishedOrders
+                    .Where(o => o.Status == OrderStatus.Finished && o.OrderTime.Date == today)
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting finished orders");
+                throw;
+            }
         }
 
-        public void UpdateOrderItemStatus(int orderItemId, ItemStatus newStatus) => _orderRepository.UpdateOrderItemStatus(orderItemId, newStatus);
+        public void UpdateOrderItemStatus(int orderItemId, ItemStatus newStatus)
+        {
+            try
+            {
+                _orderRepository.UpdateOrderItemStatus(orderItemId, newStatus);
+                _logger.LogInformation("Updated order item {ItemId} to status {Status}", orderItemId, newStatus);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating order item status: {ItemId} to {Status}", orderItemId, newStatus);
+                throw;
+            }
+        }
 
         public void UpdeteOrderStatus(Order order, OrderStatus newStatus)
         {
-            order.Status = newStatus;
+            try
+            {
+                order.Status = newStatus;
+                _logger.LogInformation("Updated order {OrderId} to status {Status}", order.Id, newStatus);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating order status: {OrderId} to {Status}", order.Id, newStatus);
+                throw;
+            }
         }
+
         public void UpdateCourseStatus(int orderId, CourseType courseType, ItemStatus newStatus)
         {
-            _logger.LogInformation($"Updating course status for Order: {orderId}, Course: {courseType}, New Status: {newStatus}");
-
-            // Get the order with all items
-            var order = GetOrderById(orderId);
-            if (order == null)
+            try
             {
-                _logger.LogError($"Order {orderId} not found");
-                throw new ArgumentException($"Order {orderId} not found");
-            }
+                _logger.LogInformation($"Updating course status for Order: {orderId}, Course: {courseType}, New Status: {newStatus}");
 
-            // Find all items for the specified course type
-            var courseItems = order.Items.Where(item => item.courseType == courseType).ToList();
-
-            if (!courseItems.Any())
-            {
-                _logger.LogWarning($"No items found for course {courseType} in order {orderId}");
-                return;
-            }
-
-            // Validate status transition (only allow ordered->preparing and preparing->ready)
-            foreach (var item in courseItems)
-            {
-                if (!IsValidStatusTransition(item.itemStatus, newStatus))
+                // Get the order with all items
+                var order = GetOrderById(orderId);
+                if (order == null)
                 {
-                    _logger.LogWarning($"Invalid status transition for item {item.Id}: {item.itemStatus} -> {newStatus}");
-                    continue; // Skip invalid transitions but continue with others
+                    _logger.LogError($"Order {orderId} not found");
+                    throw new ArgumentException($"Order {orderId} not found");
+                }
+
+                // Find all items for the specified course type
+                var courseItems = order.Items.Where(item => item.courseType == courseType).ToList();
+
+                if (!courseItems.Any())
+                {
+                    _logger.LogWarning($"No items found for course {courseType} in order {orderId}");
+                    return;
+                }
+
+                // Update each item in the course
+                foreach (var item in courseItems)
+                {
+                    if (IsValidStatusTransition(item.itemStatus, newStatus))
+                    {
+                        _orderRepository.UpdateOrderItemStatus(item.Id, newStatus);
+                        _logger.LogInformation($"Updated item {item.Id} ({item.Name}) to {newStatus}");
+                    }
                 }
             }
-
-            // Update each item in the course
-            foreach (var item in courseItems)
+            catch (Exception ex)
             {
-                if (IsValidStatusTransition(item.itemStatus, newStatus))
-                {
-                    _orderRepository.UpdateOrderItemStatus(item.Id, newStatus);
-                    _logger.LogInformation($"Updated item {item.Id} ({item.Name}) to {newStatus}");
-                }
+                _logger.LogError(ex, "Error updating course status: Order {OrderId}, Course {CourseType}", orderId, courseType);
+                throw;
             }
         }
+
         private bool IsValidStatusTransition(ItemStatus currentStatus, ItemStatus newStatus)
         {
             // Define valid transitions according to requirements
@@ -85,26 +141,35 @@ namespace restaurant_Chapeau.Services
                 _ => false
             };
         }
+
         public List<Order> FilterOrdersByTarget(List<Order> orders, Order.RoutingTarget target)
         {
-            return orders
-                .Select(order =>
-                {
-                    var targetItems = order.Items
-                        .Where(item => item.target == target)
-                        .ToList();
+            try
+            {
+                return orders
+                    .Select(order =>
+                    {
+                        var targetItems = order.Items
+                            .Where(item => item.target == target)
+                            .ToList();
 
-                    return new Order(
-                        order.Id,
-                        order.TableNumber,
-                        order.OrderTime,
-                        targetItems,
-                        order.Comment,
-                        order.Status
-                    );
-                })
-                .Where(order => order.Items.Any())
-                .ToList();
+                        return new Order(
+                            order.Id,
+                            order.TableNumber,
+                            order.OrderTime,
+                            targetItems,
+                            order.Comment,
+                            order.Status
+                        );
+                    })
+                    .Where(order => order.Items.Any())
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error filtering orders by target: {Target}", target);
+                throw;
+            }
         }
     }
 }

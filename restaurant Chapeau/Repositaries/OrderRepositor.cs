@@ -101,8 +101,8 @@ namespace restaurant_Chapeau.Repositories
             var allOrders = new List<Order>();
             using (SqlConnection conn = new(_connectionString))
             {
-                string query = @" SELECT SELECT o.OrderId, o.TableID, o.Comment, o.OrderTime, oi.Note,
-                       mi.Name AS MenuItemName, mi.Category, oi.Status, oi.OrderItemID, mi.RoutingTarget
+                string query = @"SELECT o.OrderId, o.TableID, o.Comment, o.OrderTime, oi.Note,
+                mi.Name AS MenuItemName, mi.Category, oi.Status, oi.OrderItemID, mi.RoutingTarget
                 FROM Orders o
                 JOIN OrderItems oi ON o.OrderId = oi.OrderId
                 JOIN MenuItems mi ON oi.MenuItemId = mi.MenuItemId
