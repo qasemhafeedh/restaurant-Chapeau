@@ -9,7 +9,9 @@
         public List<OrderItems> Items { get; set; }
         public string Comment { get; set; }
         public OrderStatus Status { get; set; }
-
+        /// <summary>
+        /// the class above is created by Qasem. other things are for sultan?
+        /// </summary>
         public class OrderItems
         {
             public int Id { get; set; }

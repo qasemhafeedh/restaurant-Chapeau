@@ -17,7 +17,7 @@ namespace restaurant_Chapeau.Controllers
         private readonly IOrderService _orderService;
         private readonly IMenuItemService _menuItemService;
         private readonly ITableService _tableService;
-        private readonly ILogger<OrderController> _logger;
+        private readonly ILogger<OrderController> _logger; // we need it to log message during exc.
 
         public OrderController(IOrderService orderService, IMenuItemService menuItemService, ITableService tableService, ILogger<OrderController> logger, ICartService cartService)
         {

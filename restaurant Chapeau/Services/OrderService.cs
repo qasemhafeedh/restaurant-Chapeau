@@ -25,7 +25,7 @@ public class OrderService : IOrderService
     }
 
 
-
+    // check the cart before submitting 
     public async Task<bool> SubmitOrderAsync(OrderSubmission model, int userId)
     {
         if (await _tableService.IsReservedAsync(model.TableID))
@@ -39,8 +39,6 @@ public class OrderService : IOrderService
             await _menuItemService.DecreaseStockAsync(item.MenuItemID, item.Quantity);
         }
 
-
-
         int orderId = await _orderRepository.CreateOrderAsync(model, userId);
         await _orderRepository.AddOrderItemsAsync(orderId, model.CartItems);
 
@@ -48,37 +46,53 @@ public class OrderService : IOrderService
     }
     public async Task<SubmitOrderResult> ProcessOrderSubmissionAsync(CartViewModel model, int userId)
     {
-        if (model.SelectedTableID == 0) 
+        if (model.SelectedTableID == 0)
             return new SubmitOrderResult { StatusMessage = "⚠️ Please select a table." };
 
-        if (model.Items == null || !model.Items.Any()) 
+        if (model.Items == null || !model.Items.Any())
             return new SubmitOrderResult { StatusMessage = "⚠️ Cart is empty." };
 
+        //This converts the CartViewModel (used by the view/UserInterfacee) into a format (OrderSubmission) that the
         OrderSubmission order = new OrderSubmission
         {
             TableID = model.SelectedTableID,
-            CartItems = model.Items.Select(i => new CartItem
-            {
-                MenuItemID = i.MenuItemID,
-                Name = i.Name,
-                Price = i.Price,
-                Quantity = i.Quantity,
-                Note = i.Note,
-                RoutingTarget = i.RoutingTarget.ToString()
-            }).ToList(),
+            CartItems = MapToCartItems(model.Items),   // coversion
             TipAmount = model.TipAmount,
             Comment = model.Comment
         };
 
         bool submitted = await SubmitOrderAsync(order, userId);
 
-        return new SubmitOrderResult
+        SubmitOrderResult result = new SubmitOrderResult();
+        result.Success = submitted;
+
+        if (submitted)
         {
-            Success = submitted,
-            StatusMessage = submitted
-                ? "✅ Order submitted successfully!"
-                : "⚠️ Table is currently reserved."
-        };
+            result.StatusMessage = "✅ Order submitted successfully!";
+        }
+        else
+        {
+            result.StatusMessage = " ";
+        }
+
+        return result;
+
     }
+
+    //This method converts a list of cart items from the user interface (CartItemViewModel) into a list
+    //of business-level objects (CartItem) used by the service/repository layer
+    private List<CartItem> MapToCartItems(List<CartItemViewModel> items)
+    {
+        return items.Select(i => new CartItem
+        {
+            MenuItemID = i.MenuItemID,
+            Name = i.Name,
+            Price = i.Price,
+            Quantity = i.Quantity,
+            Note = i.Note,
+            RoutingTarget = i.RoutingTarget.ToString()
+        }).ToList();
+    }
+
 
 }

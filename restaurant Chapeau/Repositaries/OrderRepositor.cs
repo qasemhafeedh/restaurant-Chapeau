@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Data.SqlClient;
 using restaurant_Chapeau.Enums;
 using restaurant_Chapeau.Models;
@@ -16,6 +17,8 @@ namespace restaurant_Chapeau.Repositories
             _connectionString = config.GetConnectionString("DefaultConnection");
         }
 
+
+        //CreateOrderAsync(...) inserts a single row in the Orders table — it gives you back orderId.
         public async Task<int> CreateOrderAsync(OrderSubmission model, int userId)
         {
             using SqlConnection conn = new(_connectionString);
@@ -31,9 +34,11 @@ namespace restaurant_Chapeau.Repositories
             cmd.Parameters.AddWithValue("@tip", model.TipAmount);
             cmd.Parameters.AddWithValue("@comment", model.Comment ?? "");
 
-            return (int)await cmd.ExecuteScalarAsync();
+            return (int)await cmd.ExecuteScalarAsync();  
         }
 
+
+       // AddOrderItemsAsync(...) inserts the actual cart items(linked by that orderId) into the OrderItems this help Kitchen and bar
        public async Task AddOrderItemsAsync(int orderId, List<CartItem> items)
         {
             using SqlConnection conn = new(_connectionString);
@@ -52,11 +57,10 @@ namespace restaurant_Chapeau.Repositories
 
                 await cmd.ExecuteNonQueryAsync();
             }
-            
-
         }
-        /////////////////////////////////////////////////////////(below this is for the bar and Kitcehn )//////////////////////////
-        
+
+
+        /////////////////////////////////////////////////////////(below this is for the bar and Kitcehn )////////////////////////// 
         private Order ReadOrder(SqlDataReader reader)
         {
             int orderId = (int)reader["OrderId"];

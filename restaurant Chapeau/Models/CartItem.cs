@@ -1,5 +1,5 @@
 ﻿namespace restaurant_Chapeau.Models
-{
+{ // cart items ty p
     public class CartItem
     {
         public int MenuItemID { get; set; }
