@@ -12,7 +12,7 @@ namespace restaurant_Chapeau.Models
         public decimal VATRate { get; set; }
         public int QuantityAvailable { get; set; }
 		public MenuType MenuType { get; set; }
-		public RoutingTarget RoutingTarget { get; set; }
+		public RoutingTarget RoutingTarget { get; set; }///
 
 		public bool IsActive { get; set; }
     }

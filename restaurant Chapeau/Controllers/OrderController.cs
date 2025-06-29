@@ -56,7 +56,7 @@ namespace restaurant_Chapeau.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> Cart()
+        public async Task<IActionResult> Cart() // chang this to enter table before adding to cart
         {
             try
             {

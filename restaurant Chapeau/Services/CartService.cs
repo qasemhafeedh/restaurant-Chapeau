@@ -22,7 +22,7 @@ public class CartService : ICartService
 
         if (!IsValidCartRequest(menuItem, model))
         {
-            return new AddToCartResult { StatusMessage = "⚠️ Invalid item or quantity." };
+            return new AddToCartResult { StatusMessage = "⚠️ Invalid item or quantity." };/// use throw execption
         }
         // accessing the session
         var session = _httpContextAccessor.HttpContext.Session;
@@ -42,7 +42,12 @@ public class CartService : ICartService
         {
             existingItem.Quantity += model.Quantity; // modifies the quentity and reflects the changes to the cart
             if (!string.IsNullOrWhiteSpace(model.Note))
-                existingItem.Note = model.Note; //override note or place it 
+            {
+                if (!string.IsNullOrWhiteSpace(existingItem.Note))
+                    existingItem.Note += "\n" + model.Note;
+                else
+                    existingItem.Note = model.Note;
+            }
         }
         else
         {
@@ -60,7 +65,7 @@ public class CartService : ICartService
     private CartItem MapToCartItem(MenuItem menuItem, AddToCartViewModel model)
     {
         return new CartItem
-        {
+        {/// keep the whole object
             MenuItemID = menuItem.MenuItemID,
             Name = menuItem.Name,
             Price = menuItem.Price,
@@ -101,7 +106,7 @@ public class CartService : ICartService
         var itemsInCart = GetCartItems();
 
         // Convert each CartItem into a simpler view model for the page
-        var viewModelItems = new List<CartItemViewModel>();
+        var viewModelItems = new List<CartItemViewModel>(); // just deel with cartItem
 
         foreach (var item in itemsInCart)
         {
@@ -118,7 +123,7 @@ public class CartService : ICartService
         }
 
         // Create the full view model to return to the view wrapping eveything to Cartviewmodel
-        var cartViewModel = new CartViewModel
+        var cartViewModel = new CartViewModel// should be a list of cartItems
         {
             Items = viewModelItems,
             Tables = tables,             // All available restaurant tables

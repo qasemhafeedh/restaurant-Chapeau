@@ -53,11 +53,11 @@
                                 <input type="hidden" name="Items[@i].RoutingTarget" value="@item.RoutingTarget" />
                             </td>
                             <td>
-                                <input type="text"
-                                       name="Items[@i].Note"
-                                       value="@item.Note"
-                                       class="form-control"
-                                       placeholder="Optional note..." />
+                                <textarea name="Items[@i].Note"
+                                          class="form-control"
+                                          rows="2"
+                                          placeholder="Optional note...">@item.Note</textarea>
+
                             </td>
                             <td>
                                 <!-- SEPARATE form: does NOT depend on table -->
