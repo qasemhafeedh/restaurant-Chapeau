@@ -2,6 +2,7 @@
 using System.Numerics;
 using restaurant_Chapeau.Models;
 using restaurant_Chapeau.Repositories;
+using restaurant_Chapeau.ViewModels;
 
 namespace restaurant_Chapeau.Repositories
 {
