@@ -6,6 +6,7 @@
 
 <div class="container mt-5 pt-5">
     <h2 class="mb-4">🛒 Order Cart</h2>
+    <a asp-action="SelectTable" class="btn btn-outline-secondary">↩️ Back to Tables</a>
 
     @if (TempData["OrderStatus"] != null)
     {
@@ -57,10 +58,7 @@
                                           class="form-control"
                                           rows="2"
                                           placeholder="Optional note...">@item.Note</textarea>
-
                             </td>
-                            <td>
-                                <!-- SEPARATE form: does NOT depend on table -->
                             <td>
                                 <a asp-action="RemoveCartItem"
                                    asp-route-id="@item.MenuItemID"
@@ -68,47 +66,23 @@
                                     ✖
                                 </a>
                             </td>
-
-                            </td>
                         </tr>
                     }
-
                 </tbody>
             </table>
 
-            <div class="mb-3">
-                <label class="form-label fw-bold">Select a Table</label>
-                <select name="SelectedTableID" class="form-select" required>
-                    <option value="">-- Choose Table --</option>
-                    @foreach (var table in Model.Tables)
-                    {
-                        var isReserved = table.ReservationStart <= DateTime.Now && table.ReservationEnd >= DateTime.Now;
-                        if (!isReserved)
-                        {
-                            <option value="@table.TableID">Table @table.TableNumber</option>
-                        }
-                    }
-                </select>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Comment</label>
-                <textarea name="Comment" class="form-control" rows="2">@Model.Comment</textarea>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Tip (€)</label>
-                <input type="number" name="TipAmount" class="form-control" step="0.01" min="0" value="@Model.TipAmount.ToString("0.00")" />
-            </div>
-
+            
             <div class="mb-3">
                 <strong>Total: €@Model.Total.ToString("0.00")</strong>
             </div>
 
-            <div class="d-flex justify-content-between">
+            <div class="d-flex justify-content-between mt-4">
                 <button type="submit" class="btn btn-success">✅ Submit Order</button>
+
                 <a asp-action="ClearCart" class="btn btn-outline-danger">🗑️ Clear Cart</a>
+   
             </div>
         </form>
+        
     }
 </div>

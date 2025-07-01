@@ -5,17 +5,16 @@
         public int TableID { get; set; }
         public int OrderID { get; set; }
         public decimal TotalAmount { get; set; }
+        public int NumberOfGuests { get; set; }
 
-        public int NumberOfGuests { get; set; } // ✅ This is required
-        public List<GuestPayment> Payments { get; set; } = new(); // ✅ This too
+        public List<GuestInvoice> Payments { get; set; } = new();
     }
 
-    public class SplitPaymentDetail
+    public class GuestInvoice
     {
         public decimal AmountPaid { get; set; }
-        public string PaymentMethod { get; set; }
-        public string Feedback { get; set; }
+        public string PaymentMethod { get; set; } = string.Empty;
+        public string Feedback { get; set; } = string.Empty;
     }
-
 }
 

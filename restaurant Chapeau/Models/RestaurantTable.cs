@@ -1,4 +1,5 @@
-﻿namespace restaurant_Chapeau.Models
+﻿
+namespace restaurant_Chapeau.Models
 {
     public class RestaurantTable
     {
@@ -7,6 +8,7 @@
         public bool IsReserved { get; set; }
         public DateTime? ReservationStart { get; set; }  //  NEW
         public DateTime? ReservationEnd { get; set; }    //  NEW
+       
     }
 
 

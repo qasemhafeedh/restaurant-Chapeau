@@ -69,24 +69,17 @@
                                     <a class="nav-link fw-semibold" asp-controller="Financial" asp-action="Overview">Financial Overview</a>
                                 </li>
                             }
-                            @if (role == "Kitchen")
+                            @if (role == "Kitchen" || role =="Bar")
                             {
                                 <li class="nav-item me-3">
-                                    <a class="nav-link fw-semibold" asp-controller="KitchenBar" asp-action="KitchenRunningOrders">Running Orders</a>
+                                    <a class="nav-link fw-semibold" asp-controller="KitchenBar" asp-action="RunningOrders">Running Orders</a>
                                 </li>
                                 <li class="nav-item me-3">
-                                    <a class="nav-link fw-semibold" asp-controller="KitchenBar" asp-action="KitchenFinishedOrders">Finished Orders</a>
+                                    <a class="nav-link fw-semibold" asp-controller="KitchenBar" asp-action="FinishedOrders">Finished Orders</a>
                                 </li>
                             }
-                            @if (role == "Bar")
-                            {
-                                <li class="nav-item me-3">
-                                    <a class="nav-link fw-semibold" asp-controller="KitchenBar" asp-action="BarRunningOrders">Running Orders</a>
-                                </li>
-                                <li class="nav-item me-3">
-                                    <a class="nav-link fw-semibold" asp-controller="KitchenBar" asp-action="BarFinishedOrders">Finished Orders</a>
-                                </li>
-                            }
+                            
+                            
                             @if (role == "Cashier")
                             {
                                 <li class="nav-item me-3">

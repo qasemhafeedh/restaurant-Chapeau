@@ -10,7 +10,7 @@ namespace restaurant_Chapeau.Services.Interfaces
         Task<AddToCartResult> AddToCartAsync(AddToCartViewModel model);
         List<CartItem> GetCartItems();
         void SaveCartItems(List<CartItem> items);
-        CartViewModel BuildCartViewModel(List<RestaurantTable> availableTables);
+        List<CartItemViewModel> BuildCartItemViewModels();
         void ClearCart();
         void RemoveItem(int id);
 

@@ -8,6 +8,6 @@
         public int Quantity { get; set; }
         public string Note { get; set; }
         public string RoutingTarget { get; set; }
-        public decimal VATRate { get; set; }
+       
     }
 }

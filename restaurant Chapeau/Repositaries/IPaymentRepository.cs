@@ -1,16 +1,20 @@
-﻿using restaurant_Chapeau.Models;
+﻿// IPaymentRepository.cs (Synchronous Version)
+using restaurant_Chapeau.Models;
+using System.Collections.Generic;
 
 namespace restaurant_Chapeau.Repositories
 {
     public interface IPaymentRepository
     {
-        Task<TableOrderView> GetCompleteOrderByTableIdAsync(int tableId);
-        Task<int> GetOpenOrderIdByTableAsync(int tableId);
-        Task<decimal> CalculateVATForOrderAsync(int orderId);
-        Task CreateInvoiceAsync(Invoice invoice);
-        Task SaveSplitPaymentAsync(int orderId, decimal amount, string method, string feedback);
-        Task FreeTableAsync(int tableId);
-        Task MarkOrderAsPaidAsync(int orderId);
-        Task<List<RestaurantTable>> GetTablesWithUnpaidOrdersAsync();
+        TableOrderView GetCompleteOrderByTableId(int tableId);
+        int GetOpenOrderIdByTable(int tableId);
+        decimal CalculateVATForOrder(int orderId);
+        void CreateInvoice(Invoice invoice);
+        void SaveSplitPayment(int orderId, decimal amount, string method, string feedback);
+        void FreeTable(int tableId);
+        void MarkOrderAsPaid(int orderId);
+        List<RestaurantTable> GetTablesWithUnpaidOrders();
+        decimal GetTotalAmountForOrder(int orderId);
+
     }
 }

@@ -20,7 +20,7 @@ namespace restaurant_Chapeau.Repositories
             using SqlConnection conn = new(_connectionString);
             await conn.OpenAsync();
 
-            var cmd = new SqlCommand("SELECT TableID, TableNumber, ReservationStart, ReservationEnd FROM RestaurantTables", conn);
+            var cmd = new SqlCommand("SELECT TableID, TableNumber,IsReserved, ReservationStart, ReservationEnd FROM RestaurantTables", conn);
             using var reader = await cmd.ExecuteReaderAsync();
 
             while (await reader.ReadAsync())
@@ -58,6 +58,7 @@ namespace restaurant_Chapeau.Repositories
             {
                 TableID = (int)reader["TableID"],
                 TableNumber = (int)reader["TableNumber"],
+                IsReserved = (bool)reader["IsReserved"],
                 ReservationStart = reader["ReservationStart"] != DBNull.Value ? (DateTime?)reader["ReservationStart"] : null,
                 ReservationEnd = reader["ReservationEnd"] != DBNull.Value ? (DateTime?)reader["ReservationEnd"] : null
             };

@@ -1,46 +1,53 @@
-﻿
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using restaurant_Chapeau.Helpers;
 using restaurant_Chapeau.Models;
 using restaurant_Chapeau.ViewModels;
 using restaurant_Chapeau.Enums;
 using restaurant_Chapeau.Services.Interfaces;
-using Microsoft.AspNetCore.Cors.Infrastructure;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 public class CartService : ICartService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IMenuItemService _menuItemService;
+
     public CartService(IHttpContextAccessor httpContextAccessor, IMenuItemService menuItemService)
     {
         _httpContextAccessor = httpContextAccessor;
         _menuItemService = menuItemService;
     }
+
     public async Task<AddToCartResult> AddToCartAsync(AddToCartViewModel model)
     {
-        var menuItem = await _menuItemService.GetMenuItemByIdAsync(model.MenuItemID);
+        MenuItem menuItem = await _menuItemService.GetMenuItemByIdAsync(model.MenuItemID);
 
         if (!IsValidCartRequest(menuItem, model))
         {
-            return new AddToCartResult { StatusMessage = "⚠️ Invalid item or quantity." };/// use throw execption
+            // return new AddToCartResult { StatusMessage = " Invalid item or quantity." }; /// use throw exception
+            throw new InvalidOperationException("Invalid item or quantity.");
         }
+
         // accessing the session
-        var session = _httpContextAccessor.HttpContext.Session;
-        var cart = session.GetObjectFromJson<List<CartItem>>("Cart") ?? new List<CartItem>();
+        ISession session = _httpContextAccessor.HttpContext.Session;
+        List<CartItem> cart = session.GetObjectFromJson<List<CartItem>>("Cart") ?? new List<CartItem>();
 
         AddOrUpdateItem(cart, menuItem, model);
         session.SetObjectAsJson("Cart", cart);
 
-        return new AddToCartResult { StatusMessage = "✅ Item added to cart!" };
+        return new AddToCartResult { StatusMessage = " Item added to cart!" };
     }
 
     public void AddOrUpdateItem(List<CartItem> cart, MenuItem menuItem, AddToCartViewModel model)
-    {  // check if they item is already in the cart or not 
-        var existingItem = cart.FirstOrDefault(i => i.MenuItemID == model.MenuItemID);
+    {
+        // check if the item is already in the cart or not 
+        CartItem existingItem = cart.FirstOrDefault(i => i.MenuItemID == model.MenuItemID);
 
         if (existingItem != null)
         {
-            existingItem.Quantity += model.Quantity; // modifies the quentity and reflects the changes to the cart
+            existingItem.Quantity += model.Quantity; // modifies the quantity and reflects the changes to the cart
+
             if (!string.IsNullOrWhiteSpace(model.Note))
             {
                 if (!string.IsNullOrWhiteSpace(existingItem.Note))
@@ -65,12 +72,12 @@ public class CartService : ICartService
     private CartItem MapToCartItem(MenuItem menuItem, AddToCartViewModel model)
     {
         return new CartItem
-        {/// keep the whole object
+        {
             MenuItemID = menuItem.MenuItemID,
             Name = menuItem.Name,
             Price = menuItem.Price,
-            Quantity = model.Quantity,
-            Note = model.Note,
+            Quantity = model.Quantity, // we need it  user input
+            Note = model.Note,         // user input interface
             RoutingTarget = menuItem.RoutingTarget.ToString()
         };
     }
@@ -78,39 +85,39 @@ public class CartService : ICartService
     public List<CartItem> GetCartItems()
     {
         return _httpContextAccessor.HttpContext.Session.GetObjectFromJson<List<CartItem>>("Cart") ?? new List<CartItem>();
-
     }
 
     public void SaveCartItems(List<CartItem> items)
     {
-        _httpContextAccessor.HttpContext.Session
-            .SetObjectAsJson("Cart", items);
+        _httpContextAccessor.HttpContext.Session.SetObjectAsJson("Cart", items);
     }
-    //to remove single item from the cart
+
+    // to remove single item from the cart
     public void RemoveItem(int id)
     {
-        var session = _httpContextAccessor.HttpContext.Session;
-        var cart = session.GetObjectFromJson<List<CartItem>>("Cart") ?? new List<CartItem>();
+        ISession session = _httpContextAccessor.HttpContext.Session;
+        List<CartItem> cart = session.GetObjectFromJson<List<CartItem>>("Cart") ?? new List<CartItem>();
         cart.RemoveAll(i => i.MenuItemID == id);
         session.SetObjectAsJson("Cart", cart);
     }
-    // to delete the whole cart once
+
+    // to delete the whole cart 
     public void ClearCart()
     {
         _httpContextAccessor.HttpContext.Session.Remove("Cart");
     }
 
-    public CartViewModel BuildCartViewModel(List<RestaurantTable> tables)
+    public List<CartItemViewModel> BuildCartItemViewModels()
     {
         // Get the items currently saved in the cart from session
-        var itemsInCart = GetCartItems();
+        List<CartItem> itemsInCart = GetCartItems();
 
         // Convert each CartItem into a simpler view model for the page
-        var viewModelItems = new List<CartItemViewModel>(); // just deel with cartItem
+        List<CartItemViewModel> viewModelItems = new List<CartItemViewModel>();
 
-        foreach (var item in itemsInCart)
+        foreach (CartItem item in itemsInCart)
         {
-            viewModelItems.Add(new CartItemViewModel
+            CartItemViewModel viewModel = new CartItemViewModel
             {
                 MenuItemID = item.MenuItemID,
                 Name = item.Name,
@@ -118,23 +125,11 @@ public class CartService : ICartService
                 Quantity = item.Quantity,
                 Note = item.Note,
                 RoutingTarget = Enum.Parse<RoutingTarget>(item.RoutingTarget)
+            };
 
-            });
+            viewModelItems.Add(viewModel);
         }
 
-        // Create the full view model to return to the view wrapping eveything to Cartviewmodel
-        var cartViewModel = new CartViewModel// should be a list of cartItems
-        {
-            Items = viewModelItems,
-            Tables = tables,             // All available restaurant tables
-            TipAmount = 0,               // Default tip
-            Comment = "",                // Empty comment box
-            SelectedTableID = 0          // No table selected yet
-        };
-
-        return cartViewModel;
+        return viewModelItems;
     }
-
-
 }
-

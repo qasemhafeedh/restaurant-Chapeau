@@ -5,7 +5,7 @@
     ViewData["Title"] = "Finished  Orders";
 }
 
-<h1>Finished Kitchen Orders</h1>
+<h1>Finished Orders</h1>
 <div class="orders-container">
     @foreach (var order in Model)
     {
@@ -14,10 +14,7 @@
             <p><strong>Table:</strong> @order.TableNumber</p>
             <p><strong>Time:</strong> @order.OrderTime.ToString("HH:mm")</p>
             <p><strong>Status:</strong> @order.Status</p>
-            @if (!string.IsNullOrEmpty(order.Comment))
-            {
-                <p><strong>Comment:</strong> @order.Comment</p>
-            }
+            
            
 
             @foreach (var group in order.Items.GroupBy(i => i.courseType))
@@ -30,7 +27,7 @@
                         {
                             <li class="item-entry">
                                 <div class="item-info">
-                                    <span class="item-name">@item.Name</span>
+                                    <span class="item-name">@item.Name</span
                                     <span class="status-tag @item.itemStatus.ToString().ToLower()">
                                         @item.itemStatus
                                     </span>

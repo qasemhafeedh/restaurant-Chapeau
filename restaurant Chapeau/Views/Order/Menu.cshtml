@@ -19,12 +19,13 @@
         <a href="/Order/Cart" class="btn btn-outline-secondary position-relative">
             🛒 <span class="badge bg-danger position-absolute top-0 start-100 translate-middle">View</span>
         </a>
+       
     </div>
 }
 
 <div class="container mt-4">
     <h2 class="mb-4">Menu</h2>
-
+    <a asp-action="SelectTable" class="btn btn-outline-secondary">↩️ Back to Tables</a>
     @if (TempData["OrderStatus"] != null)
     {
         <div class="alert alert-info">@TempData["OrderStatus"]</div>

@@ -1,8 +1,8 @@
-﻿using System.Data.SqlClient;
-using System.Numerics;
-using restaurant_Chapeau.Models;
-using restaurant_Chapeau.Repositories;
+﻿using restaurant_Chapeau.Models;
 using restaurant_Chapeau.ViewModels;
+using System.Collections.Generic;
+using System.Data.SqlClient;
+using static restaurant_Chapeau.Models.Order;
 
 namespace restaurant_Chapeau.Repositories
 {
@@ -15,189 +15,205 @@ namespace restaurant_Chapeau.Repositories
             _connectionString = connectionString;
         }
 
-        public async Task<TableOrderView> GetCompleteOrderByTableIdAsync(int tableId)
+
+        public TableOrderView GetCompleteOrderByTableId(int tableId)
         {
-            var model = new TableOrderView
+            var view = new TableOrderView
             {
-                TableID = tableId,
-                Items = new List<OrderItemView>()
+                TableNumber = tableId,
+                Items = new List<OrderItemView>(),
+                TotalLowVAT = 0,
+                TotalHighVAT = 0,
+                TotalAmount = 0
             };
 
-            using var connection = new SqlConnection(_connectionString);
-            await connection.OpenAsync();
-
-            // Get table number
-            var getTableCmd = new SqlCommand("SELECT TableNumber FROM RestaurantTables WHERE TableID = @TableID", connection);
-            getTableCmd.Parameters.AddWithValue("@TableID", tableId);
-            var tableNumberObj = await getTableCmd.ExecuteScalarAsync();
-            if (tableNumberObj == null) return model;
-
-            model.TableNumber = (int)tableNumberObj;
-
-            // Get latest unpaid order
-            var getOrderCmd = new SqlCommand(@"
-                SELECT TOP 1 OrderID 
-                FROM Orders 
-                WHERE TableID = @TableID AND IsPaid = 0 
-                ORDER BY OrderTime DESC", connection);
-            getOrderCmd.Parameters.AddWithValue("@TableID", tableId);
-            var orderIdObj = await getOrderCmd.ExecuteScalarAsync();
-            if (orderIdObj == null) return model;
-
-            int orderId = (int)orderIdObj;
-
-            // Get order items
-            var cmd = new SqlCommand(@"
-                SELECT mi.Name, SUM(oi.Quantity) AS TotalQuantity, mi.Price, mi.VATRate
-                FROM OrderItems oi
-                JOIN MenuItems mi ON oi.MenuItemID = mi.MenuItemID
-                WHERE oi.OrderID = @OrderID
-                GROUP BY mi.Name, mi.Price, mi.VATRate", connection);
-            cmd.Parameters.AddWithValue("@OrderID", orderId);
-
-            decimal total = 0, totalLowVAT = 0, totalHighVAT = 0;
-
-            using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
+            using (var conn = new SqlConnection(_connectionString))
             {
-                string name = reader["Name"].ToString();
-                int qty = (int)reader["TotalQuantity"];
-                decimal price = (decimal)reader["Price"];
-                decimal vat = (decimal)reader["VATRate"];
-                decimal subtotal = qty * price;
+                conn.Open();
+                var cmd = new SqlCommand(@"
+                    SELECT mi.Name, oi.Quantity, mi.Price, mi.VATRate
+                    FROM Orders o
+                    JOIN OrderItems oi ON o.OrderID = oi.OrderID
+                    JOIN MenuItems mi ON oi.MenuItemID = mi.MenuItemID
+                    WHERE o.TableID = @tableId 
+                      AND o.OrderID NOT IN (SELECT OrderID FROM Invoices)", conn);
 
-                model.Items.Add(new OrderItemView
+                cmd.Parameters.AddWithValue("@tableId", tableId);
+
+                using (var reader = cmd.ExecuteReader())
                 {
-                    ItemName = name,
-                    Quantity = qty,
-                    TotalPrice = subtotal,
-                    VATRate = vat
-                });
+                    while (reader.Read())
+                    {
+                        string name = reader.GetString(0);
+                        int qty = reader.GetInt32(1);
+                        decimal price = reader.GetDecimal(2);
+                        decimal vatRate = reader.GetDecimal(3);
 
-                total += subtotal;
+                        decimal totalPrice = qty * price;
 
-                if (vat == 9.00M)
-                    totalLowVAT += subtotal * vat / 100;
-                else if (vat == 21.00M)
-                    totalHighVAT += subtotal * vat / 100;
+                        var item = new OrderItemView
+                        {
+                            ItemName = name,
+                            Quantity = qty,
+                            TotalPrice = totalPrice,
+                            VATRate = vatRate
+                        };
+
+                        if (vatRate == 21)
+                            view.TotalHighVAT += totalPrice * 0.21m;
+                        else
+                            view.TotalLowVAT += totalPrice * 0.09m;
+
+                        view.TotalAmount += totalPrice;
+                        view.Items.Add(item);
+                    }
+                }
             }
 
-            model.TotalAmount = total;
-            model.TotalLowVAT = totalLowVAT;
-            model.TotalHighVAT = totalHighVAT;
-
-            return model;
+            return view;
         }
 
-        public async Task<int> GetOpenOrderIdByTableAsync(int tableId)
+        public int GetOpenOrderIdByTable(int tableId)
         {
-            using var conn = new SqlConnection(_connectionString);
-            await conn.OpenAsync();
-            var cmd = new SqlCommand(@"
-                SELECT TOP 1 OrderID 
-                FROM Orders 
-                WHERE TableID = @TableID AND IsPaid = 0 
-                ORDER BY OrderTime DESC", conn);
-            cmd.Parameters.AddWithValue("@TableID", tableId);
-            var result = await cmd.ExecuteScalarAsync();
-            return result != null ? (int)result : 0;
+            using (var conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                var cmd = new SqlCommand(@"
+            SELECT TOP 1 OrderID 
+            FROM Orders 
+            WHERE TableID = @tableId
+              AND OrderID NOT IN (SELECT OrderID FROM Invoices)", conn);
+
+                cmd.Parameters.AddWithValue("@tableId", tableId);
+
+                var result = cmd.ExecuteScalar();
+                return result != null ? Convert.ToInt32(result) : -1;
+            }
         }
 
-        public async Task<decimal> CalculateVATForOrderAsync(int orderId)
+
+        public decimal CalculateVATForOrder(int orderId)
         {
-            using var conn = new SqlConnection(_connectionString);
-            await conn.OpenAsync();
-            var cmd = new SqlCommand(@"
-                SELECT SUM(oi.Quantity * mi.Price * mi.VATRate / 100.0)
-                FROM OrderItems oi
-                JOIN MenuItems mi ON oi.MenuItemID = mi.MenuItemID
-                WHERE oi.OrderID = @OrderID", conn);
-            cmd.Parameters.AddWithValue("@OrderID", orderId);
-            return (decimal)(await cmd.ExecuteScalarAsync() ?? 0);
+            // Dummy VAT value; adjust logic per item VAT in production
+            return 0.21m;
         }
 
-        public async Task CreateInvoiceAsync(Invoice invoice)
+        public void CreateInvoice(Invoice invoice)
         {
-            decimal CostAmount = invoice.TotalAmount * 0.6m; 
-            using var conn = new SqlConnection(_connectionString);
-            await conn.OpenAsync();
+            using (var conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                var cmd = new SqlCommand(@"
+                    INSERT INTO Invoices (InvoiceNumber, OrderID, UserID, TotalAmount, TipAmount, VATAmount, CreatedAt)
+                    VALUES (@InvoiceNumber, @OrderID, @UserID, @TotalAmount, @TipAmount, @VATAmount, GETDATE())", conn);
 
-            var cmd = new SqlCommand(@"INSERT INTO Invoices (InvoiceNumber, OrderID, UserID, TotalAmount, TipAmount, VATAmount, CostAmount, CreatedAt)
-                                     VALUES (@InvoiceNumber, @OrderID, @UserID, @TotalAmount, @TipAmount, @VATAmount, @CostAmount, GETDATE())", conn);
+                cmd.Parameters.AddWithValue("@InvoiceNumber", invoice.InvoiceNumber);
+                cmd.Parameters.AddWithValue("@OrderID", invoice.OrderID);
+                cmd.Parameters.AddWithValue("@UserID", invoice.UserID);
+                cmd.Parameters.AddWithValue("@TotalAmount", invoice.TotalAmount);
+                cmd.Parameters.AddWithValue("@TipAmount", invoice.TipAmount);
+                cmd.Parameters.AddWithValue("@VATAmount", invoice.VATAmount);
 
-            cmd.Parameters.AddWithValue("@InvoiceNumber", invoice.InvoiceNumber);
-            cmd.Parameters.AddWithValue("@OrderID", invoice.OrderID);
-            cmd.Parameters.AddWithValue("@UserID", invoice.UserID);
-            cmd.Parameters.AddWithValue("@TotalAmount", invoice.TotalAmount);
-            cmd.Parameters.AddWithValue("@TipAmount", invoice.TipAmount);
-            cmd.Parameters.AddWithValue("@VATAmount", invoice.VATAmount);
-            cmd.Parameters.AddWithValue("@CostAmount", CostAmount);
-
-            await cmd.ExecuteNonQueryAsync();
-
-
-            // Mark the order as paid
-            var updateCmd = new SqlCommand("UPDATE Orders SET IsPaid = 1 WHERE OrderID = @OrderID", conn);
-            updateCmd.Parameters.AddWithValue("@OrderID", invoice.OrderID);
-            await updateCmd.ExecuteNonQueryAsync();
+                cmd.ExecuteNonQuery();
+            }
         }
 
-        public async Task SaveSplitPaymentAsync(int orderId, decimal amount, string method, string feedback)
+        public void SaveSplitPayment(int orderId, decimal amount, string method, string feedback)
         {
-            using var conn = new SqlConnection(_connectionString);
-            await conn.OpenAsync();
-            var cmd = new SqlCommand(@"
-                INSERT INTO Payments (OrderID, Amount, PaymentMethod, Feedback)
-                VALUES (@OrderID, @Amount, @Method, @Feedback)", conn);
-            cmd.Parameters.AddWithValue("@OrderID", orderId);
-            cmd.Parameters.AddWithValue("@Amount", amount);
-            cmd.Parameters.AddWithValue("@Method", method);
-            cmd.Parameters.AddWithValue("@Feedback", feedback ?? "");
-            await cmd.ExecuteNonQueryAsync();
+            using (var conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+
+                var checkCmd = new SqlCommand("SELECT COUNT(*) FROM Orders WHERE OrderID = @orderId", conn);
+                checkCmd.Parameters.AddWithValue("@orderId", orderId);
+                int count = (int)checkCmd.ExecuteScalar();
+                if (count == 0)
+                {
+                    throw new Exception($"❌ OrderID {orderId} does not exist in the Orders table. Cannot save invoice.");
+                }
+
+                var cmd = new SqlCommand(@"
+                    INSERT INTO Invoices (InvoiceNumber, OrderID, UserID, TotalAmount, TipAmount, VATAmount, CreatedAt)
+                    VALUES (@InvoiceNumber, @OrderID, @UserID, @TotalAmount, @TipAmount, @VATAmount, GETDATE())", conn);
+
+                cmd.Parameters.AddWithValue("@InvoiceNumber", Guid.NewGuid().ToString());
+                cmd.Parameters.AddWithValue("@OrderID", orderId);
+                cmd.Parameters.AddWithValue("@UserID", 1); // Replace with actual logged-in user ID if needed
+                cmd.Parameters.AddWithValue("@TotalAmount", amount);
+                cmd.Parameters.AddWithValue("@TipAmount", 0);
+                cmd.Parameters.AddWithValue("@VATAmount", 0);
+
+                cmd.ExecuteNonQuery();
+            }
         }
 
-        public async Task FreeTableAsync(int tableId)
+        public decimal GetTotalAmountForOrder(int orderId)
         {
-            using var conn = new SqlConnection(_connectionString);
-            await conn.OpenAsync();
-            var cmd = new SqlCommand(@"
-                UPDATE RestaurantTables
-                SET IsReserved = 0, ReservationStart = NULL, ReservationEnd = NULL
-                WHERE TableID = @TableID", conn);
-            cmd.Parameters.AddWithValue("@TableID", tableId);
-            await cmd.ExecuteNonQueryAsync();
+            decimal total = 0;
+
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                string query = @"
+        SELECT SUM(oi.Quantity * mi.Price)
+        FROM OrderItems oi
+        JOIN MenuItems mi ON oi.MenuItemID = mi.MenuItemID
+        WHERE oi.OrderID = @orderId;";
+
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@orderId", orderId);
+                    conn.Open();
+                    var result = cmd.ExecuteScalar();
+                    if (result != DBNull.Value)
+                    {
+                        total = Convert.ToDecimal(result);
+                    }
+                }
+            }
+
+            return total;
         }
 
-        public async Task MarkOrderAsPaidAsync(int orderId)
+        public void FreeTable(int tableId)
         {
-            using var conn = new SqlConnection(_connectionString);
-            await conn.OpenAsync();
-            var cmd = new SqlCommand("UPDATE Orders SET IsPaid = 1 WHERE OrderID = @OrderID", conn);
-            cmd.Parameters.AddWithValue("@OrderID", orderId);
-            await cmd.ExecuteNonQueryAsync();
+            using (var conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                var cmd = new SqlCommand("UPDATE RestaurantTables SET IsReserved = 0, ReservationStart = NULL, ReservationEnd = NULL WHERE TableID = @id", conn);
+                cmd.Parameters.AddWithValue("@id", tableId);
+                cmd.ExecuteNonQuery();
+            }
         }
 
+        public void MarkOrderAsPaid(int orderId)
+        {
+            // Optional: Add flag in Orders to mark as paid if needed
+        }
 
-        public async Task<List<RestaurantTable>> GetTablesWithUnpaidOrdersAsync()
+        public List<RestaurantTable> GetTablesWithUnpaidOrders()
         {
             var tables = new List<RestaurantTable>();
-            using var conn = new SqlConnection(_connectionString);
-            await conn.OpenAsync();
 
-            var cmd = new SqlCommand(@"
-                SELECT DISTINCT rt.TableID, rt.TableNumber
-                FROM RestaurantTables rt
-                JOIN Orders o ON rt.TableID = o.TableID
-                WHERE o.IsPaid = 0", conn);
-
-            var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
+            using (var conn = new SqlConnection(_connectionString))
             {
-                tables.Add(new RestaurantTable
+                conn.Open();
+                var cmd = new SqlCommand(@"
+                    SELECT DISTINCT t.TableID, t.TableNumber
+                    FROM RestaurantTables t
+                    JOIN Orders o ON t.TableID = o.TableID
+                    WHERE o.OrderID NOT IN (SELECT OrderID FROM Invoices)", conn);
+
+                using (var reader = cmd.ExecuteReader())
                 {
-                    TableID = reader.GetInt32(0),
-                    TableNumber = reader.GetInt32(1)
-                });
+                    while (reader.Read())
+                    {
+                        tables.Add(new RestaurantTable
+                        {
+                            TableID = reader.GetInt32(0),
+                            TableNumber = reader.GetInt32(1),
+                        });
+                    }
+                }
             }
 
             return tables;
