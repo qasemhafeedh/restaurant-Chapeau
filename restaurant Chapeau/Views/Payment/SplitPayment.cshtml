@@ -1,9 +1,28 @@
 ﻿@model restaurant_Chapeau.Models.SplitPaymentViewModel
+@{
+    ViewData["Title"] = "Split Payment";
+    decimal amountPerPerson = Model.TotalAmount / Model.NumberOfGuests;
+}
 
 <div class="container mt-4">
-    <h2>Split Payment - Table @Model.TableID</h2>
+    <h2>🧮 Split Payment – Table @Model.TableID</h2>
+    <p>Total to be paid: <strong>€@Model.TotalAmount.ToString("0.00")</strong></p>
+    <p>Number of Guests: <strong>@Model.NumberOfGuests</strong></p>
 
-    <form method="post">
+    <form asp-action="SplitPayment" method="get" class="mb-4">
+        <input type="hidden" name="tableId" value="@Model.TableID" />
+        <div class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label">Change Number of Guests</label>
+                <input type="number" name="numberOfGuests" min="1" class="form-control" value="@Model.NumberOfGuests" />
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-outline-secondary">🔄 Update</button>
+            </div>
+        </div>
+    </form>
+
+    <form asp-action="SplitPayment" method="post">
         <input type="hidden" asp-for="OrderID" />
         <input type="hidden" asp-for="TableID" />
         <input type="hidden" asp-for="TotalAmount" />
@@ -12,27 +31,35 @@
             @for (int i = 0; i < Model.Payments.Count; i++)
             {
                 <div class="col-md-6 mb-4">
-                    <h5>Guest @(i + 1)</h5>
-                    <div class="mb-2">
-                        <label>Amount Paid (€)</label>
-                        <input asp-for="Payments[@i].AmountPaid" class="form-control" />
-                    </div>
-                    <div class="mb-2">
-                        <label>Payment Method</label>
-                        <select asp-for="Payments[@i].PaymentMethod" class="form-control">
-                            <option>Cash</option>
-                            <option>Debit Card</option>
-                            <option>Credit Card</option>
-                        </select>
-                    </div>
-                    <div class="mb-2">
-                        <label>Feedback</label>
-                        <textarea asp-for="Payments[@i].Feedback" class="form-control"></textarea>
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Guest @(i + 1)</h5>
+
+                            <div class="mb-2">
+                                <label>Amount Paid (€)</label>
+                                <input asp-for="Payments[@i].AmountPaid" class="form-control" />
+                                <span class="text-muted">Suggested: €@amountPerPerson.ToString("0.00")</span>
+                            </div>
+
+                            <div class="mb-2">
+                                <label>Payment Method</label>
+                                <select asp-for="Payments[@i].PaymentMethod" class="form-control">
+                                    <option>Cash</option>
+                                    <option>Debit Card</option>
+                                    <option>Credit Card</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-2">
+                                <label>Feedback</label>
+                                <textarea asp-for="Payments[@i].Feedback" class="form-control" rows="2"></textarea>
+                            </div>
+                        </div>
                     </div>
                 </div>
             }
         </div>
 
-        <button type="submit" class="btn btn-primary">Confirm Payment</button>
+        <button type="submit" class="btn btn-primary">💾 Confirm All Payments</button>
     </form>
 </div>
