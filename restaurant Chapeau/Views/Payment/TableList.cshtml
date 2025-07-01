@@ -1,26 +1,17 @@
 ﻿@model List<restaurant_Chapeau.Models.RestaurantTable>
-
 @{
-    ViewData["Title"] = "Tables with Unpaid Orders";
-}
-
-<!-- ✅ Payment Success Toast -->
-@if (TempData["PaymentSuccess"] != null)
-{
-    <div id="toast" class="alert alert-success position-fixed top-0 end-0 m-4" style="z-index:1050;">
-        @TempData["PaymentSuccess"]
-    </div>
-
-    <script>
-        setTimeout(() => {
-            const toast = document.getElementById("toast");
-            if (toast) toast.style.display = "none";
-        }, 3000);
-    </script>
+    ViewData["Title"] = "Unpaid Tables";
 }
 
 <div class="container mt-5">
-    <h2 class="mb-4">Select a Table to View Its Order</h2>
+    <h2 class="mb-4">💰 Select a Table to View Order</h2>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Message"]
+        </div>
+    }
 
     @if (Model != null && Model.Any())
     {
@@ -28,12 +19,12 @@
             @foreach (var table in Model)
             {
                 <div class="col-md-4 col-lg-3 mb-4">
-                    <div class="card border-primary shadow-sm h-100">
+                    <div class="card border-success shadow-sm h-100">
                         <div class="card-body text-center">
                             <h5 class="card-title">Table @table.TableNumber</h5>
                             <a asp-action="ViewTableOrder"
                                asp-route-tableId="@table.TableID"
-                               class="btn btn-outline-primary mt-3">
+                               class="btn btn-outline-success mt-2">
                                 View Order
                             </a>
                         </div>
@@ -44,8 +35,8 @@
     }
     else
     {
-        <div class="alert alert-info mt-4">
-            <strong>No unpaid tables available.</strong> All orders are settled.
+        <div class="alert alert-info">
+            ✅ All tables are settled. No unpaid orders found.
         </div>
     }
 </div>

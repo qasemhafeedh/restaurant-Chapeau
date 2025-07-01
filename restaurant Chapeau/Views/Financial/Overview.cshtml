@@ -31,21 +31,32 @@
         </div>
     </form>
 
-    <div class="card p-4 shadow-sm">
-        <h5>Period: @ViewBag.StartDate to @ViewBag.EndDate</h5>
-        <hr />
-        <p><strong>Total Sales - Lunch:</strong> €@ViewBag.LunchSales</p>
-        <p><strong>Total Sales - Dinner:</strong> €@ViewBag.DinnerSales</p>
-        <p><strong>Total Sales - Drink:</strong> €@ViewBag.DrinkSales</p>
-        <p><strong>Total Revenue:</strong> €@ViewBag.TotalRevenue</p>
-        <p><strong>Total Tips:</strong> €@ViewBag.TotalTips</p>
-    </div>
-    <div class="card p-4 shadow-sm">
-        <h5>Period: @ViewBag.StartDate to @ViewBag.EndDate</h5>
-        <hr />
-        <p><strong>Total Income - Lunch:</strong> €@ViewBag.LunchIncome</p>
-        <p><strong>Total Income - Dinner:</strong> €@ViewBag.DinnerIncome</p>
-        <p><strong>Total Income - Drink:</strong> €@ViewBag.DrinkIncome</p>
-        <p><strong>Total Income:</strong> €@ViewBag.TotalIncome</p>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card p-4 shadow-sm mb-4">
+                <h5 class="text-primary">Sales Summary</h5>
+                <p class="text-muted">Period: @ViewBag.StartDate to @ViewBag.EndDate</p>
+                <hr />
+                <p><strong>Total Sales - Lunch:</strong> €@ViewBag.LunchSales.ToString("F2")</p>
+                <p><strong>Total Sales - Dinner:</strong> €@ViewBag.DinnerSales.ToString("F2")</p>
+                <p><strong>Total Sales - Drink:</strong> €@ViewBag.DrinkSales.ToString("F2")</p>
+                <h4 class="text-success"><strong>Total Revenue:</strong> €@ViewBag.TotalRevenue.ToString("F2")</h4>
+                <p><strong>Total Tips:</strong> €@ViewBag.TotalTips.ToString("F2")</p>
+                <p><strong>Total VAT:</strong> €@ViewBag.TotalVAT.ToString("F2")</p>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card p-4 shadow-sm mb-4">
+                <h5 class="text-success">Income Summary</h5>
+                <p class="text-muted">Period: @ViewBag.StartDate to @ViewBag.EndDate</p>
+                <hr />
+                <p><strong>Net Income - Lunch:</strong> €@ViewBag.LunchIncome.ToString("F2")</p>
+                <p><strong>Net Income - Dinner:</strong> €@ViewBag.DinnerIncome.ToString("F2")</p>
+                <p><strong>Net Income - Drink:</strong> €@ViewBag.DrinkIncome.ToString("F2")</p>
+                <h4 class="text-primary"><strong>Total Net Income:</strong> €@ViewBag.TotalIncome.ToString("F2")</h4>
+                <small class="text-muted">* Net Income = Revenue - VAT</small>
+            </div>
+        </div>
     </div>
 </div>

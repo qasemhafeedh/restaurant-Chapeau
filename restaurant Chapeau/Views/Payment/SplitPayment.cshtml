@@ -1,11 +1,25 @@
 ﻿@model restaurant_Chapeau.Models.SplitPaymentViewModel
 @{
     ViewData["Title"] = "Split Payment";
-    decimal amountPerPerson = Model.TotalAmount / Model.NumberOfGuests;
+    // Fix the divide by zero error
+    decimal amountPerPerson = Model.TotalAmount > 0 && Model.NumberOfGuests > 0
+                              ? Model.TotalAmount / Model.NumberOfGuests
+                              : 0;
 }
 
 <div class="container mt-4">
     <h2>🧮 Split Payment – Table @Model.TableID</h2>
+
+    @if (Model.TotalAmount <= 0)
+    {
+        <div class="alert alert-warning">
+            <h4>⚠️ No Order Amount Found</h4>
+            <p>Unable to calculate split payment because the total order amount is €0.00.</p>
+            <a asp-action="Index" class="btn btn-primary">🔙 Back to Tables</a>
+        </div>
+        return;
+    }
+
     <p>Total to be paid: <strong>€@Model.TotalAmount.ToString("0.00")</strong></p>
     <p>Number of Guests: <strong>@Model.NumberOfGuests</strong></p>
 
@@ -14,7 +28,7 @@
         <div class="row g-2 align-items-end">
             <div class="col-md-4">
                 <label class="form-label">Change Number of Guests</label>
-                <input type="number" name="numberOfGuests" min="1" class="form-control" value="@Model.NumberOfGuests" />
+                <input type="number" name="numberOfGuests" min="1" max="20" class="form-control" value="@Model.NumberOfGuests" />
             </div>
             <div class="col-auto">
                 <button type="submit" class="btn btn-outline-secondary">🔄 Update</button>
@@ -26,6 +40,7 @@
         <input type="hidden" asp-for="OrderID" />
         <input type="hidden" asp-for="TableID" />
         <input type="hidden" asp-for="TotalAmount" />
+        <input type="hidden" asp-for="NumberOfGuests" />
 
         <div class="row">
             @for (int i = 0; i < Model.Payments.Count; i++)
@@ -37,8 +52,11 @@
 
                             <div class="mb-2">
                                 <label>Amount Paid (€)</label>
-                                <input asp-for="Payments[@i].AmountPaid" class="form-control" />
-                                <span class="text-muted">Suggested: €@amountPerPerson.ToString("0.00")</span>
+                                <input asp-for="Payments[@i].AmountPaid" class="form-control" step="0.01" min="0" />
+                                @if (amountPerPerson > 0)
+                                {
+                                    <span class="text-muted">Suggested: €@amountPerPerson.ToString("0.00")</span>
+                                }
                             </div>
 
                             <div class="mb-2">
@@ -52,7 +70,7 @@
 
                             <div class="mb-2">
                                 <label>Feedback</label>
-                                <textarea asp-for="Payments[@i].Feedback" class="form-control" rows="2"></textarea>
+                                <textarea asp-for="Payments[@i].Feedback" class="form-control" rows="2" placeholder="Optional feedback..."></textarea>
                             </div>
                         </div>
                     </div>
@@ -60,6 +78,14 @@
             }
         </div>
 
+        <div class="card bg-light p-3 mb-3">
+            <h6>Payment Summary</h6>
+            <p><strong>Total Order Amount:</strong> €@Model.TotalAmount.ToString("0.00")</p>
+            <p><strong>Suggested Per Person:</strong> €@amountPerPerson.ToString("0.00")</p>
+            <small class="text-muted">Make sure the total of all payments equals the order amount.</small>
+        </div>
+
         <button type="submit" class="btn btn-primary">💾 Confirm All Payments</button>
+        <a asp-action="ViewTableOrder" asp-route-tableId="@Model.TableID" class="btn btn-secondary ms-2">🔙 Back to Order</a>
     </form>
 </div>

@@ -11,6 +11,6 @@
         public decimal VATAmount { get; set; }
         public DateTime CreatedAt { get; set; }
 
-        public decimal CostAmount { get; set; }
+        // Removed CostAmount as it's not in your database schema
     }
 }

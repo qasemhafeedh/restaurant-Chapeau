@@ -74,6 +74,8 @@ namespace restaurant_Chapeau.Controllers
             return View("SplitPayment", model);
         }
 
+
+
         [HttpPost]
         public IActionResult SplitPayment(SplitPaymentViewModel model)
         {
@@ -86,7 +88,6 @@ namespace restaurant_Chapeau.Controllers
 
             return RedirectToAction("Confirmation");
         }
-
 
         [HttpGet]
         public IActionResult Confirmation()

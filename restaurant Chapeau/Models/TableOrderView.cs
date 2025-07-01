@@ -10,6 +10,8 @@ namespace restaurant_Chapeau.Models
         public decimal TotalLowVAT { get; set; }
         public decimal TotalHighVAT { get; set; }
         public decimal TotalAmount { get; set; }
+        public int OrderID { get; set; }
+
     }
 
 }
