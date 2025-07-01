@@ -21,9 +21,13 @@ namespace restaurant_Chapeau.Repositories
             using SqlConnection conn = new SqlConnection(_connectionString);
             conn.Open();
 
-            SqlCommand cmd = new SqlCommand("SELECT * FROM Invoices WHERE CreatedAt BETWEEN @start AND @end", conn);
+            SqlCommand cmd = new SqlCommand(@"
+                SELECT InvoiceID, InvoiceNumber, OrderID, UserID, TotalAmount, TipAmount, VATAmount, CreatedAt 
+                FROM Invoices 
+                WHERE CreatedAt BETWEEN @start AND @end", conn);
+
             cmd.Parameters.AddWithValue("@start", startDate);
-            cmd.Parameters.AddWithValue("@end", endDate);
+            cmd.Parameters.AddWithValue("@end", endDate.AddDays(1)); // Include full end date
 
             SqlDataReader reader = cmd.ExecuteReader();
 
@@ -38,8 +42,7 @@ namespace restaurant_Chapeau.Repositories
                     TotalAmount = (decimal)reader["TotalAmount"],
                     TipAmount = (decimal)reader["TipAmount"],
                     VATAmount = (decimal)reader["VATAmount"],
-                    CreatedAt = (DateTime)reader["CreatedAt"],
-                    CostAmount = (decimal)reader["CostAmount"]
+                    CreatedAt = (DateTime)reader["CreatedAt"]
                 });
             }
 

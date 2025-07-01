@@ -28,32 +28,51 @@ namespace restaurant_Chapeau.Services
         public FinishOrderViewModel BuildFinishOrderViewModel(int tableId)
         {
             var order = _repo.GetCompleteOrderByTableId(tableId);
+            if (order == null || order.OrderID == 0)
+                return null;
+
             var vat = _repo.CalculateVATForOrder(order.OrderID);
+            var totalWithVAT = order.TotalAmount + order.TotalLowVAT + order.TotalHighVAT;
 
             return new FinishOrderViewModel
             {
                 TableID = tableId,
                 OrderID = order.OrderID,
-                TotalAmount = order.TotalAmount + order.TotalLowVAT + order.TotalHighVAT,
-                VATAmount = vat
+                TotalAmount = totalWithVAT,
+                VATAmount = vat,
+                TipAmount = 0,
+                PaymentMethod = "Cash",
+                Feedback = ""
             };
         }
 
         public (bool IsSuccess, string ErrorMessage) FinalizeOrder(FinishOrderViewModel model)
         {
-            var invoice = new Invoice
+            try
             {
-                InvoiceNumber = System.Guid.NewGuid().ToString(),
-                OrderID = model.OrderID,
-                UserID = 1,
-                TotalAmount = model.TotalAmount,
-                TipAmount = model.TipAmount,
-                VATAmount = model.VATAmount
-            };
+                // Calculate VAT properly
+                var vatAmount = _repo.CalculateVATForOrder(model.OrderID);
 
-            _repo.CreateInvoice(invoice);
-            _repo.FreeTable(model.TableID);
-            return (true, "");
+                var invoice = new Invoice
+                {
+                    InvoiceNumber = System.Guid.NewGuid().ToString().Substring(0, 8),
+                    OrderID = model.OrderID,
+                    UserID = 1, // TODO: Get from session
+                    TotalAmount = model.TotalAmount + model.TipAmount,
+                    TipAmount = model.TipAmount,
+                    VATAmount = vatAmount
+                };
+
+                _repo.CreateInvoice(invoice);
+                _repo.MarkOrderAsPaid(model.OrderID);
+                _repo.FreeTable(model.TableID);
+
+                return (true, "Order completed successfully!");
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Error processing payment: {ex.Message}");
+            }
         }
 
         public SplitPaymentViewModel BuildSplitPaymentViewModel(int tableId, int numberOfGuests)
@@ -62,56 +81,74 @@ namespace restaurant_Chapeau.Services
             if (orderId <= 0)
                 return null;
 
-            decimal totalAmount = _repo.GetTotalAmountForOrder(orderId); // ✅ Get total from repository
+            var order = _repo.GetCompleteOrderByTableId(tableId);
+            if (order == null)
+                return null;
+
+            // Calculate total including VAT
+            decimal totalAmount = order.TotalAmount + order.TotalLowVAT + order.TotalHighVAT;
+
+            // Ensure we have a valid total amount
+            if (totalAmount <= 0)
+            {
+                totalAmount = _repo.GetTotalAmountForOrder(orderId);
+            }
+
+            // Ensure number of guests is valid
+            if (numberOfGuests <= 0)
+                numberOfGuests = 2;
+
+            decimal amountPerPerson = totalAmount > 0 ? Math.Round(totalAmount / numberOfGuests, 2) : 0;
 
             return new SplitPaymentViewModel
             {
                 TableID = tableId,
                 OrderID = orderId,
-                TotalAmount = totalAmount, // ✅ Set total for split calculation
+                TotalAmount = totalAmount,
                 NumberOfGuests = numberOfGuests,
                 Payments = Enumerable.Range(0, numberOfGuests)
-                                     .Select(_ => new GuestInvoice())
+                                     .Select(_ => new GuestInvoice
+                                     {
+                                         AmountPaid = amountPerPerson,
+                                         PaymentMethod = "Cash",
+                                         Feedback = ""
+                                     })
                                      .ToList()
             };
         }
 
-
-
-
         public (bool IsSuccess, string ErrorMessage) ProcessSplitPayment(SplitPaymentViewModel model)
         {
-            // 1. Total up what was paid
-            var totalPaid = model.Payments.Sum(p => Math.Round(p.AmountPaid, 2));
-            var expected = Math.Round(model.TotalAmount, 2);
-
-            if (totalPaid != expected)
+            try
             {
-                return (false, $"❌ Total paid (€{totalPaid:0.00}) does not match the expected amount (€{expected:0.00}).");
-            }
+                // Validate total payment
+                var totalPaid = model.Payments.Sum(p => Math.Round(p.AmountPaid, 2));
+                var expected = Math.Round(model.TotalAmount, 2);
 
-            // 2. Create a separate invoice for each guest
-            foreach (var p in model.Payments)
-            {
-                var invoice = new Invoice
+                if (Math.Abs(totalPaid - expected) > 0.01m) // Allow 1 cent difference for rounding
                 {
-                    InvoiceNumber = Guid.NewGuid().ToString(),
-                    OrderID = model.OrderID,
-                    UserID = 1, // Later: pull this from session or controller context
-                    TotalAmount = Math.Round(p.AmountPaid, 2),
-                    TipAmount = 0,
-                    VATAmount = 0,
-                    CreatedAt = DateTime.Now
-                };
+                    return (false, $"❌ Total paid (€{totalPaid:0.00}) does not match the expected amount (€{expected:0.00}).");
+                }
 
-                _repo.CreateInvoice(invoice);
+                // Create separate invoices for each guest
+                foreach (var payment in model.Payments)
+                {
+                    if (payment.AmountPaid > 0)
+                    {
+                        _repo.SaveSplitPayment(model.OrderID, payment.AmountPaid, payment.PaymentMethod, payment.Feedback);
+                    }
+                }
+
+                // Mark order as paid and free the table
+                _repo.MarkOrderAsPaid(model.OrderID);
+                _repo.FreeTable(model.TableID);
+
+                return (true, "Split payment processed successfully!");
             }
-
-            // 3. Update order + table
-            _repo.MarkOrderAsPaid(model.OrderID);
-            _repo.FreeTable(model.TableID);
-
-            return (true, "");
+            catch (Exception ex)
+            {
+                return (false, $"Error processing split payment: {ex.Message}");
+            }
         }
     }
 }
